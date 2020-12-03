@@ -1,0 +1,37 @@
+<resources>
+    <string name="app_name">TimeAttendance2</string>
+    <string-array name="units">
+        <item>Select Unit</item>
+        <item>Unit1</item>
+        <item>Unit2</item>
+        <item>Unit3</item>
+        <item>Unit4</item>
+        <item>Unit5</item>
+    </string-array>
+
+    <string-array name="configs">
+        <item>Config</item>
+        <item>Config File</item>
+        <item>Config</item>
+    </string-array>
+
+    <string-array name="reports">
+        <item>Report</item>
+        <item>Data Log</item>
+        <item>Image</item>
+        <item>Payroll</item>
+        <item>Wage per site</item>
+    </string-array>
+
+    <string-array name="dailyReports">
+        <item>Data Log</item>
+        <item>Image</item>
+    </string-array>
+
+    <string-array name="payrolls">
+        <item>View report1</item>
+        <item>View report2</item>
+        <item>View report3</item>
+        <item>Make report</item>
+    </string-array>
+</resources>

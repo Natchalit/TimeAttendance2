@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.timeattendance2">
+
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission. ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <uses-feature
+        android:name="android.hardware.camera2"
+        android:required="true" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.TimeAttendance2">
+        <activity
+            android:name="com.example.timeattendance2.activities.ImageDailyThumbnail"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name="com.example.timeattendance2.activities.ImageDaily"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name="com.example.timeattendance2.activities.Payroll"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name="com.example.timeattendance2.activities.WagePerSite"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name="com.example.timeattendance2.activities.MakeReport"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name="com.example.timeattendance2.activities.DataLog"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name="com.example.timeattendance2.activities.DashboardAdmin"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name="com.example.timeattendance2.activities.LoginAdmin"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name="com.example.timeattendance2.activities.CaptureCheckout"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name="com.example.timeattendance2.activities.CaptureCheckin"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name="com.example.timeattendance2.activities.CheckoutPage"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name="com.example.timeattendance2.activities.CheckinPage"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name="com.example.timeattendance2.activities.MainMenu"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name="com.example.timeattendance2.activities.MainActivity"
+            android:screenOrientation="landscape">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.example.android.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <meta-data
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="barcode" />
+    </application>
+
+</manifest>
