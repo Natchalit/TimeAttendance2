@@ -64,8 +64,8 @@ public class CheckinPage extends AppCompatActivity implements AdapterView.OnItem
             @Override
             public void onLocationChanged(Location location) {
 
-                Log.i("Lat", String.valueOf(location.getLatitude()));
-                Log.i("Long", String.valueOf(location.getLongitude()));
+//                Log.i("Lat", String.valueOf(location.getLatitude()));
+//                Log.i("Long", String.valueOf(location.getLongitude()));
 
                 try {
                     Geocoder geocoder = new Geocoder(CheckinPage.this, Locale.getDefault());
@@ -74,8 +74,8 @@ public class CheckinPage extends AppCompatActivity implements AdapterView.OnItem
                             location.getLongitude(),
                             1
                     );
-                    String address = addresses.get(0).getAddressLine(0);
-                    Log.i("Address",address);
+//                    String address = addresses.get(0).getAddressLine(0);
+//                    Log.i("Address",address);
                 } catch (Exception e){
                     e.printStackTrace();
                 }

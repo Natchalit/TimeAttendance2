@@ -132,17 +132,19 @@ public class CaptureCheckout extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (resultCode == RESULT_OK)
-            if (requestCode == CAMERA_RESULT_CODE) {
-                File f = new File(currentPhotoPath);
-                Uri uri = Uri.fromFile(f);
-                imageView.setImageURI(uri);
+        if (data != null)
+            if (resultCode == RESULT_OK) {
+                if (requestCode == CAMERA_RESULT_CODE) {
+                    File f = new File(currentPhotoPath);
+                    Uri uri = Uri.fromFile(f);
+                    imageView.setImageURI(uri);
 
-                try {
-                    image = InputImage.fromFilePath(this, uri);
-                    scanBarcodes(image);
-                } catch (IOException e) {
-                    e.printStackTrace();
+//                    try {
+//                        image = InputImage.fromFilePath(this, uri);
+//                        scanBarcodes(image);
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
                 }
             }
     }

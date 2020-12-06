@@ -10,6 +10,7 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -77,8 +78,8 @@ public class CaptureCheckin extends AppCompatActivity {
         String token = getData.getStringExtra("token");
         float request_id = getData.getFloatExtra("request_id", 0);
 
-
         imageView = (ImageView) findViewById(R.id.imageView);
+
         captureBtn = (Button) findViewById(R.id.captureBtn);
         backBtn = (Button) findViewById(R.id.backBtn);
 
@@ -92,6 +93,7 @@ public class CaptureCheckin extends AppCompatActivity {
         dateRealtime();
         refreshTime();
     }
+
 
     private void dataCaptureUser() {
 
@@ -150,34 +152,51 @@ public class CaptureCheckin extends AppCompatActivity {
         });
     }
 
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(CaptureCheckin.this,
+                        "com.example.android.fileprovider",
+                        photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                Log.i("PHURI", String.valueOf(photoURI));
+
+                startActivityForResult(takePictureIntent, CAMERA_RESULT_CODE);
+
+            }
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (resultCode == RESULT_OK) {
-            if (requestCode == CAMERA_RESULT_CODE) {
-                Log.d("Result", "!!!!!!!!!!!!!!!!!!!!!");
-                File f = new File(currentPhotoPath);
-                Uri uri = Uri.fromFile(f);
-                imageView.setImageURI(uri);
-//                Toast.makeText(getApplicationContext(), uri.getPath(), Toast.LENGTH_SHORT).show();
-//                Log.d("tag", "Absolute Url of image is :" + uri);
+//        if (data != null)
+            if (resultCode == RESULT_OK) {
+                if (requestCode == CAMERA_RESULT_CODE) {
 
-//                Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-//                mediaScanIntent.setData(uri);
-//                this.sendBroadcast(mediaScanIntent);
-
-                try {
-                    image = InputImage.fromFilePath(this, uri);
-                    scanBarcodes(image);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    File f = new File(currentPhotoPath);
+                    Uri uri = Uri.fromFile(f);
+                    imageView.setImageURI(uri);
+                    Log.i("SETIMAGE","SETTTTTTTTTTTTTTTTTTTTTTTTt");
+                    try {
+                        image = InputImage.fromFilePath(this, uri);
+                        scanBarcodes(image);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
-
-
             }
-        }
-
     }
 
     private void scanBarcodes(InputImage image) {
@@ -200,12 +219,12 @@ public class CaptureCheckin extends AppCompatActivity {
 
                             String rawValue = barcode.getRawValue();
 
-//                            if (rawValue.isEmpty()) {
-                            Toast.makeText(CaptureCheckin.this, rawValue, Toast.LENGTH_SHORT).show();
-//                            }else {
-//                                Toast.makeText(CaptureCheckin.this, "Don't have QR code in this picture", Toast.LENGTH_SHORT).show();
-//                            }
-//                            Log.d("tag","QR Code has text : "+rawValue);
+                            if (rawValue.isEmpty()) {
+                                Toast.makeText(CaptureCheckin.this, rawValue, Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(CaptureCheckin.this, "Don't have QR code in this picture", Toast.LENGTH_SHORT).show();
+                            }
+                            Log.d("tag", "QR Code has text : " + rawValue);
                         }
                     }
                 })
@@ -215,33 +234,6 @@ public class CaptureCheckin extends AppCompatActivity {
                         Toast.makeText(CaptureCheckin.this, "Cant read QR Code", Toast.LENGTH_SHORT).show();
                     }
                 });
-    }
-
-    private void dispatchTakePictureIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Ensure that there's a camera activity to handle the intent
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            // Create the File where the photo should go
-            File photoFile = null;
-            try {
-                photoFile = createImageFile();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-            // Continue only if the File was successfully created
-            if (photoFile != null) {
-                Uri photoURI = FileProvider.getUriForFile(CaptureCheckin.this,
-                        "com.example.android.fileprovider",
-                        photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                Log.d("Already", "@@@@@@@@@@@@@@@@@@@@@@@");
-                try {
-                    startActivityForResult(takePictureIntent, CAMERA_RESULT_CODE);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
     }
 
     private File createImageFile() throws IOException {
@@ -258,25 +250,24 @@ public class CaptureCheckin extends AppCompatActivity {
 
         // Save a file: path for use with ACTION_VIEW intents
         currentPhotoPath = image.getAbsolutePath();
-        Log.d("CrateIMG", "@@@@@@@@@@@@@@@@@@@@@");
         return image;
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == CAMERA_RESULT_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                Intent it = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                if (it.resolveActivity(getPackageManager()) != null) {
-                    dispatchTakePictureIntent();
-                }
-            } else {
-                Toast.makeText(CaptureCheckin.this, "ไม่สามารถใช้งานกล้องได้", Toast.LENGTH_LONG).show();
-            }
-        } else {
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
-    }
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        if (requestCode == CAMERA_RESULT_CODE) {
+//            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+//                Intent it = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//                if (it.resolveActivity(getPackageManager()) != null) {
+//                    dispatchTakePictureIntent();
+//                }
+//            } else {
+//                Toast.makeText(CaptureCheckin.this, "ไม่สามารถใช้งานกล้องได้", Toast.LENGTH_LONG).show();
+//            }
+//        } else {
+//            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//        }
+//    }
 
     public void alertDialog() {
         captureBtn.setOnClickListener(new View.OnClickListener() {
