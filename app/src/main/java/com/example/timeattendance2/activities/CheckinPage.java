@@ -46,10 +46,30 @@ public class CheckinPage extends AppCompatActivity implements AdapterView.OnItem
         Sites[] getSites = (Sites[]) getData.getSerializableExtra("getSites");
 
         locationGet();
+//        next();
         backBtn(token,request_id,getSites);
         nextBtn(token,request_id,getSites);
         unitList();
 
+    }
+
+    private void next() {
+        nextBtn = findViewById(R.id.nextBtn);
+
+        nextBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                Spinner spinner = (Spinner) findViewById(R.id.selectUnitSpn);
+//                Sites site = (Sites) spinner.getSelectedItem();
+////                capture();
+//                captureCheckIn(token,request_id,site,getSites);
+            }
+        });
+    }
+
+    private void capture() {
+        Intent intent = new Intent(this, CaptureCheckin.class);
+        startActivity(intent);
     }
 
     public void locationGet() {

@@ -36,7 +36,7 @@ public class MainMenu extends AppCompatActivity {
 
         checkInBtn(token, getSites, request_id);
         checkOutBtn(token, getSites, request_id);
-//        adminMenuBtn(request_id);
+        adminMenuBtn(token, getSites, request_id);
     }
 
     public void checkInBtn(String token, Sites[] sites, float request_id) {
@@ -49,8 +49,6 @@ public class MainMenu extends AppCompatActivity {
         });
     }
 
-
-
     public void checkOutBtn(String token, Sites[] sites, float request_id) {
         checkOutBtn = findViewById(R.id.checkOutBtn);
         checkOutBtn.setOnClickListener(new View.OnClickListener() {
@@ -61,26 +59,31 @@ public class MainMenu extends AppCompatActivity {
         });
     }
 
-    public void adminMenuBtn(float request_id) {
+    public void adminMenuBtn(String token, Sites[] getSites, float request_id) {
         adminMenuBtn = findViewById(R.id.adminMenuBtn);
         adminMenuBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.i("Request", "Request id" + request_id);
-//                adminLogin();
+                dashBoardAdmin(token, getSites, request_id);
             }
         });
     }
 
+    private void dashBoardAdmin(String token, Sites[] getSites, float request_id) {
+        Intent intent = new Intent(this, DashboardAdmin.class);
+        intent.putExtra("token", token);
+        intent.putExtra("getSites", getSites);
+        intent.putExtra("request_id", request_id);
+        startActivity(intent);
+    }
+
     public void openCheckInPage(String token, Sites[] getSites, float request_id) {
-
-
         Intent intent = new Intent(this, CheckinPage.class);
         intent.putExtra("token", token);
         intent.putExtra("getSites", getSites);
         intent.putExtra("request_id", request_id);
         startActivity(intent);
-
     }
 
     public void openCheckOutPage(String token, Sites[] getSites, float request_id) {
@@ -88,11 +91,6 @@ public class MainMenu extends AppCompatActivity {
         intent.putExtra("token", token);
         intent.putExtra("getSites", getSites);
         intent.putExtra("request_id", request_id);
-        startActivity(intent);
-    }
-
-    public void adminLogin() {
-        Intent intent = new Intent(this, LoginAdmin.class);
         startActivity(intent);
     }
 

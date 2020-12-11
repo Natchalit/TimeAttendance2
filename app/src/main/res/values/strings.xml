@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">TimeAttendance2</string>
+    <string name="app_name">TimeAttendance</string>
     <string-array name="units">
         <item>Select Unit</item>
         <item>Unit1</item>

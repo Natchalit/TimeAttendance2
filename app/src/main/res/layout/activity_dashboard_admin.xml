@@ -45,32 +45,32 @@
                 android:textAlignment="center" />
         </LinearLayout>
 
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="250dp"
-            android:layout_gravity="center"
-            android:layout_margin="20dp"
-            android:textAlignment="center"
-            app:cardBackgroundColor="#CFEEFF"
-            app:cardCornerRadius="20dp">
+<!--        <androidx.cardview.widget.CardView-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="250dp"-->
+<!--            android:layout_gravity="center"-->
+<!--            android:layout_margin="20dp"-->
+<!--            android:textAlignment="center"-->
+<!--            app:cardBackgroundColor="#CFEEFF"-->
+<!--            app:cardCornerRadius="20dp">-->
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:orientation="horizontal"
-                android:textAlignment="center">
+<!--            <LinearLayout-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:gravity="center"-->
+<!--                android:orientation="horizontal"-->
+<!--                android:textAlignment="center">-->
 
-                <com.github.mikephil.charting.charts.PieChart
-                    android:id="@+id/pie_chart"
-                    android:layout_width="350dp"
-                    android:layout_height="match_parent"
-                    android:layout_margin="20dp"
-                    android:padding="16dp" />
+<!--                <com.github.mikephil.charting.charts.PieChart-->
+<!--                    android:id="@+id/pie_chart"-->
+<!--                    android:layout_width="350dp"-->
+<!--                    android:layout_height="match_parent"-->
+<!--                    android:layout_margin="20dp"-->
+<!--                    android:padding="16dp" />-->
 
-            </LinearLayout>
+<!--            </LinearLayout>-->
 
-        </androidx.cardview.widget.CardView>
+<!--        </androidx.cardview.widget.CardView>-->
 
         <LinearLayout
             android:layout_width="match_parent"

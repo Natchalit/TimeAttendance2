@@ -1,22 +1,24 @@
 package com.example.timeattendance2.activities;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import android.Manifest;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Message;
 import android.provider.MediaStore;
 
 import android.util.Log;
@@ -58,7 +60,7 @@ public class CaptureCheckin extends AppCompatActivity {
     private Button captureBtn, finishCheckInBtn, backBtn;
     private TextView unitName;
 
-    ImageView imageView;
+    Uri photoURI;
     String currentPhotoPath;
     InputImage image;
     String token;
@@ -78,7 +80,6 @@ public class CaptureCheckin extends AppCompatActivity {
         String token = getData.getStringExtra("token");
         float request_id = getData.getFloatExtra("request_id", 0);
 
-        imageView = (ImageView) findViewById(R.id.imageView);
 
         captureBtn = (Button) findViewById(R.id.captureBtn);
         backBtn = (Button) findViewById(R.id.backBtn);
@@ -125,20 +126,7 @@ public class CaptureCheckin extends AppCompatActivity {
         captureBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (ContextCompat.checkSelfPermission(CaptureCheckin.this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                    Intent it = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    if (it.resolveActivity(getPackageManager()) != null) {
-//                        Log.d("Take picture","Take picture");
-                        dispatchTakePictureIntent();
-                    }
-                } else {
-                    if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
-                        Toast.makeText(CaptureCheckin.this, "ไม่สามารถใช้งานกล้องได้", Toast.LENGTH_LONG).show();
-                    }
-                    requestPermissions(new String[]{
-                            Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE
-                    }, CAMERA_RESULT_CODE);
-                }
+                dispatchTakePictureIntent();
             }
         });
     }
@@ -152,8 +140,36 @@ public class CaptureCheckin extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        Log.i("Result", String.valueOf(data) + " " + String.valueOf(requestCode) + " " + String.valueOf(resultCode));
+        if (data != null) {
+            if (resultCode == RESULT_OK) {
+                if (requestCode == CAMERA_RESULT_CODE) {
+                    File f = new File(currentPhotoPath);
+                    Uri uri = Uri.fromFile(f);
+                    ImageView imageView = (ImageView) findViewById(R.id.imageView);
+                    imageView.setImageURI(uri);
+
+                    try {
+                        image = InputImage.fromFilePath(CaptureCheckin.this, uri);
+                        scanBarcodes(image);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }
+        }
+
+    }
+
     private void dispatchTakePictureIntent() {
+
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        String authority = "com.example.timeattendance2.fileprovider";
         // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             // Create the File where the photo should go
@@ -165,42 +181,25 @@ public class CaptureCheckin extends AppCompatActivity {
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
-                Uri photoURI = FileProvider.getUriForFile(CaptureCheckin.this,
-                        "com.example.android.fileprovider",
-                        photoFile);
+                Log.i("Photo file", String.valueOf(photoFile));
+
+                photoURI = FileProvider.getUriForFile(CaptureCheckin.this,
+                        authority, photoFile);
+
+                Log.i("photoUri", String.valueOf(photoURI));
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                Log.i("PHURI", String.valueOf(photoURI));
 
-                startActivityForResult(takePictureIntent, CAMERA_RESULT_CODE);
 
+                try {
+                    startActivityForResult(takePictureIntent, CAMERA_RESULT_CODE);
+                } catch (ActivityNotFoundException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-//        if (data != null)
-            if (resultCode == RESULT_OK) {
-                if (requestCode == CAMERA_RESULT_CODE) {
-
-                    File f = new File(currentPhotoPath);
-                    Uri uri = Uri.fromFile(f);
-                    imageView.setImageURI(uri);
-                    Log.i("SETIMAGE","SETTTTTTTTTTTTTTTTTTTTTTTTt");
-                    try {
-                        image = InputImage.fromFilePath(this, uri);
-                        scanBarcodes(image);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-    }
-
     private void scanBarcodes(InputImage image) {
-        Log.d("Barcode", "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         BarcodeScannerOptions options =
                 new BarcodeScannerOptions.Builder()
                         .setBarcodeFormats(
@@ -219,12 +218,14 @@ public class CaptureCheckin extends AppCompatActivity {
 
                             String rawValue = barcode.getRawValue();
 
-                            if (rawValue.isEmpty()) {
-                                Toast.makeText(CaptureCheckin.this, rawValue, Toast.LENGTH_SHORT).show();
-                            } else {
-                                Toast.makeText(CaptureCheckin.this, "Don't have QR code in this picture", Toast.LENGTH_SHORT).show();
-                            }
-                            Log.d("tag", "QR Code has text : " + rawValue);
+//                            if (rawValue.isEmpty()) {
+//                                Log.i("QR CODE",rawValue);
+//                                Toast.makeText(CaptureCheckin.this, rawValue, Toast.LENGTH_SHORT).show();
+//                            } else {
+//                                Log.i("QR CODE","Dont have QR CODE");
+//                                Toast.makeText(CaptureCheckin.this, "Don't have QR code in this picture", Toast.LENGTH_SHORT).show();
+//                            }
+//                            Log.d("tag", "QR Code has text : " + rawValue);
                         }
                     }
                 })
@@ -241,6 +242,7 @@ public class CaptureCheckin extends AppCompatActivity {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        Log.i("Image file direct", String.valueOf(storageDir));
 //        File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
@@ -252,22 +254,6 @@ public class CaptureCheckin extends AppCompatActivity {
         currentPhotoPath = image.getAbsolutePath();
         return image;
     }
-
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//        if (requestCode == CAMERA_RESULT_CODE) {
-//            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-//                Intent it = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-//                if (it.resolveActivity(getPackageManager()) != null) {
-//                    dispatchTakePictureIntent();
-//                }
-//            } else {
-//                Toast.makeText(CaptureCheckin.this, "ไม่สามารถใช้งานกล้องได้", Toast.LENGTH_LONG).show();
-//            }
-//        } else {
-//            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//        }
-//    }
 
     public void alertDialog() {
         captureBtn.setOnClickListener(new View.OnClickListener() {
@@ -326,6 +312,11 @@ public class CaptureCheckin extends AppCompatActivity {
         textViewTime.setText(formattedTime);
 
         refresh(1000);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     private void refresh(int milliseconds) {

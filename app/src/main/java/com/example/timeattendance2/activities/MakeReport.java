@@ -69,6 +69,7 @@ public class MakeReport extends AppCompatActivity {
                 });
             }
         });
+
     }
 
 
@@ -77,6 +78,7 @@ public class MakeReport extends AppCompatActivity {
         confirmBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 StepView stepView = findViewById(R.id.stepView);
                 step = step + 1;
                 stepView.go(step, true);

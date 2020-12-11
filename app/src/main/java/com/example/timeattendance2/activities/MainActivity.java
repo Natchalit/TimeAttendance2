@@ -50,11 +50,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+//                login();
                 userLogin();
 
             }
 
         });
+    }
+
+    private void login() {
+        Intent intent = new Intent(this, MainMenu.class);
+        startActivity(intent);
     }
 
     private void userLogin() {
@@ -93,13 +99,6 @@ public class MainActivity extends AppCompatActivity {
                         String token = loginResponse.getToken();
                         float request_id = loginResponse.getRequest_id();
                         Sites[] getSites = loginResponse.getSites();
-
-//                        for (int i = 0 ; i<=sites.length-1; i++){
-//                            Log.i("Index", String.valueOf(sites[i].getIndex()));
-//                            Log.i("Site",sites[i].getName());
-//                            Log.i("Latitude", String.valueOf(sites[i].getLatitude()));
-//                            Log.i("Longitude",String.valueOf(sites[i].getLongitude()));
-//                        }
 
                         logintoMainmenu(token,getSites,request_id);
                     }
