@@ -1,6 +1,8 @@
 package com.example.timeattendance2.model;
 
-public class Images {
+import java.io.Serializable;
+
+public class Images implements Serializable {
     private int staffid;
     private String staffName,url;
     private float timeStamp;

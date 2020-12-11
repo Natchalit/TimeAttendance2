@@ -17,34 +17,38 @@ import com.example.timeattendance2.model.Sites;
 
 public class DashboardAdmin extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
-    AnyChartView totalPieChart;
     Button signOutBtn;
-    String[] units = {"unit1", "unit2", "unit3", "unit4"};
-    int[] totals = {100, 200, 300, 400};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard_admin);
 
-//        setupPieChart2();
+        Intent getData = getIntent();
+        float request_id = getData.getFloatExtra("request_id", 0);
+        String token = getData.getStringExtra("token");
+        Sites[] getSites = (Sites[]) getData.getSerializableExtra("getSites");
+
         dropDownConfig();
         dropDownReport();
-        signOut();
+        backBtn(request_id,token,getSites);
     }
 
-    public void signOut() {
+    public void backBtn(float request_id, String token, Sites[] getSites) {
         signOutBtn = findViewById(R.id.logOutBtn);
         signOutBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mainMenus();
+                mainMenus(request_id,token,getSites);
             }
         });
     }
 
-    public void mainMenus() {
+    public void mainMenus(float request_id, String token, Sites[] getSites) {
         Intent intent = new Intent(this, MainMenu.class);
+        intent.putExtra("token",token);
+        intent.putExtra("request_id",request_id);
+        intent.putExtra("getSites",getSites);
         startActivity(intent);
     }
 
@@ -72,12 +76,30 @@ public class DashboardAdmin extends AppCompatActivity implements AdapterView.OnI
         Toast.makeText(parent.getContext(), text, Toast.LENGTH_SHORT).show();
 
         if (parent.getItemAtPosition(position).equals("Payroll")) {
+
+            Intent getData = getIntent();
+            float request_id = getData.getFloatExtra("request_id", 0);
+            String token = getData.getStringExtra("token");
+            Sites[] getSites = (Sites[]) getData.getSerializableExtra("getSites");
+
             Intent intent = new Intent(this, Payroll.class);
+            intent.putExtra("token", token);
+            intent.putExtra("getSites", getSites);
+            intent.putExtra("request_id", request_id);
             startActivity(intent);
         }
 
         if (parent.getItemAtPosition(position).equals("Image")) {
+
+            Intent getData = getIntent();
+            float request_id = getData.getFloatExtra("request_id", 0);
+            String token = getData.getStringExtra("token");
+            Sites[] getSites = (Sites[]) getData.getSerializableExtra("getSites");
+
             Intent intent = new Intent(this, ImageDaily.class);
+            intent.putExtra("token", token);
+            intent.putExtra("getSites", getSites);
+            intent.putExtra("request_id", request_id);
             startActivity(intent);
         }
 

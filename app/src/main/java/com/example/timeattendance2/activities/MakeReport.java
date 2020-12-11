@@ -13,6 +13,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.timeattendance2.R;
+import com.example.timeattendance2.model.Sites;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.shuhart.stepview.StepView;
@@ -33,15 +34,21 @@ public class MakeReport extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_make_report);
 
+        Intent getData = getIntent();
+        float request_id = getData.getFloatExtra("request_id", 0);
+        String token = getData.getStringExtra("token");
+        Sites[] getSites = (Sites[]) getData.getSerializableExtra("getSites");
+
         makeReportTv = findViewById(R.id.makeReportTv);
         editTextDateRange = findViewById(R.id.editTextDateRange);
         editTextDateRange.setInputType(InputType.TYPE_NULL);
 
         selectDateRange();
+
         confirmBtn();
         resetTVBtn();
         stepView();
-        backBtn();
+        backBtn(request_id, token, getSites);
 
     }
 
@@ -84,8 +91,11 @@ public class MakeReport extends AppCompatActivity {
                 stepView.go(step, true);
 
                 if (step == 1) {
+                    editTextDateRange.setEnabled(false);
                     makeReportTv.setText("Make Report 2");
                 } else if (step == 2) {
+                    resetTV.setEnabled(false);
+                    resetTV.setVisibility(View.INVISIBLE);
                     makeReportTv.setText("Make Report 3");
 
                 }
@@ -102,6 +112,7 @@ public class MakeReport extends AppCompatActivity {
                 StepView stepView = findViewById(R.id.stepView);
                 stepView.go(step, true);
                 makeReportTv.setText("Make Report");
+                editTextDateRange.setEnabled(true);
                 editTextDateRange.setText("Select Date");
 
 
@@ -109,12 +120,12 @@ public class MakeReport extends AppCompatActivity {
         });
     }
 
-    public void backBtn() {
+    public void backBtn(float request_id, String token, Sites[] getSites) {
         backBtn = findViewById(R.id.backBtn);
         backBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                payRoll();
+                payRoll(request_id, token, getSites);
             }
         });
     }
@@ -145,8 +156,11 @@ public class MakeReport extends AppCompatActivity {
                 .commit();
     }
 
-    public void payRoll() {
+    public void payRoll(float request_id, String token, Sites[] getSites) {
         Intent intent = new Intent(this, Payroll.class);
+        intent.putExtra("token", token);
+        intent.putExtra("request_id", request_id);
+        intent.putExtra("getSites", getSites);
         startActivity(intent);
     }
 }

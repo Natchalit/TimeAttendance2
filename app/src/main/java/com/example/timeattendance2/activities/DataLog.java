@@ -51,10 +51,10 @@ public class DataLog extends AppCompatActivity implements AdapterView.OnItemSele
         String token = getData.getStringExtra("token");
         Sites[] getSites = (Sites[]) getData.getSerializableExtra("getSites");
 
-        setGetDate();
+//        setGetDate();
         unitList();
 //        confirmBtn(token);
-        backBtn();
+        backBtn(request_id,token,getSites);
     }
 
 //    private void confirmBtn(String token) {
@@ -103,18 +103,21 @@ public class DataLog extends AppCompatActivity implements AdapterView.OnItemSele
 //        });
 //    }
 
-    public void backBtn() {
+    public void backBtn(float request_id, String token, Sites[] getSites) {
         backBtn = findViewById(R.id.backBtn);
         backBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dashboardAdmin();
+                dashboardAdmin(request_id,token,getSites);
             }
         });
     }
 
-    public void dashboardAdmin() {
+    public void dashboardAdmin(float request_id, String token, Sites[] getSites) {
         Intent intent = new Intent(this, DashboardAdmin.class);
+        intent.putExtra("token", token);
+        intent.putExtra("getSites", getSites);
+        intent.putExtra("request_id", request_id);
         startActivity(intent);
     }
 
@@ -138,8 +141,8 @@ public class DataLog extends AppCompatActivity implements AdapterView.OnItemSele
 
     public void setGetDate() {
 
-        getDate = findViewById(R.id.getDate);
-        showDate = findViewById(R.id.showDate);
+//        getDate = findViewById(R.id.getDate);
+//        showDate = findViewById(R.id.showDate);
         datePicker = findViewById(R.id.datePicker);
         getDate.setOnClickListener(new View.OnClickListener() {
             @Override

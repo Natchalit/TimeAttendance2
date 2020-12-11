@@ -14,6 +14,10 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.example.timeattendance2.R;
+import com.example.timeattendance2.model.Sites;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ImageDaily extends AppCompatActivity implements AdapterView.OnItemSelectedListener{
 
@@ -30,20 +34,25 @@ public class ImageDaily extends AppCompatActivity implements AdapterView.OnItemS
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_daily);
 
+        Intent getData = getIntent();
+        float request_id = getData.getFloatExtra("request_id", 0);
+        String token = getData.getStringExtra("token");
+        Sites[] getSites = (Sites[]) getData.getSerializableExtra("getSites");
+
         radioGroup = (RadioGroup) findViewById(R.id.radioGroup);
 
         unitList();
-        backBtn();
+        backBtn(request_id,token,getSites);
         conFirmBth();
 
     }
 
-    public void backBtn() {
+    public void backBtn(float request_id, String token, Sites[] getSites) {
         backBtn = findViewById(R.id.backBtn);
         backBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dashboardAdmin();
+                dashboardAdmin(request_id,token,getSites);
             }
         });
     }
@@ -72,7 +81,16 @@ public class ImageDaily extends AppCompatActivity implements AdapterView.OnItemS
 
     public void unitList() {
         Spinner spinner = findViewById(R.id.selectUnitSpn);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.units, android.R.layout.simple_spinner_item);
+
+        Intent getData = getIntent();
+        Sites[] sites = (Sites[]) getData.getSerializableExtra("getSites");
+
+        List<Sites> sitesList = new ArrayList<>();
+        for (int i = 0; i < sites.length; i++) {
+            sitesList.add(sites[i]);
+        }
+
+        ArrayAdapter<Sites> adapter = new ArrayAdapter<Sites>(this, android.R.layout.simple_spinner_item, sitesList);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(this);
@@ -92,8 +110,11 @@ public class ImageDaily extends AppCompatActivity implements AdapterView.OnItemS
         startActivity(intent);
     }
 
-    public void dashboardAdmin() {
+    public void dashboardAdmin(float request_id, String token, Sites[] getSites) {
         Intent intent = new Intent(this, DashboardAdmin.class);
+        intent.putExtra("token",token);
+        intent.putExtra("request_id",request_id);
+        intent.putExtra("getSites",getSites);
         startActivity(intent);
     }
 
