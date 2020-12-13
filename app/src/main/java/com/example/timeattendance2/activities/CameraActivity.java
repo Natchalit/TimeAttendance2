@@ -5,9 +5,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.util.Size;
-import android.view.OrientationEventListener;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -38,7 +36,6 @@ import java.util.concurrent.Executors;
 public class CameraActivity extends AppCompatActivity {
     private PreviewView previewView;
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
-    private TextView textView;
     private Button cameraCapture;
     private final Executor executor = Executors.newSingleThreadExecutor();
 
@@ -48,7 +45,6 @@ public class CameraActivity extends AppCompatActivity {
         setContentView(R.layout.activity_camera);
         previewView = findViewById(R.id.previewView);
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
-        textView = findViewById(R.id.orientation);
         cameraCapture = findViewById(R.id.camera_capture_button);
         cameraProviderFuture.addListener((Runnable) () -> {
             try {
@@ -91,13 +87,7 @@ public class CameraActivity extends AppCompatActivity {
                 new ImageAnalysis.Builder().setTargetResolution(new Size(1280, 720))
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build();
         imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this), ImageProxy::close);
-        OrientationEventListener orientationEventListener = new OrientationEventListener(this) {
-            @Override
-            public void onOrientationChanged(int orientation) {
-                textView.setText(String.valueOf(orientation));
-            }
-        };
-        orientationEventListener.enable();
+
         Preview preview = new Preview.Builder().build();
         CameraSelector cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA;
         ImageCapture.Builder builder = new ImageCapture.Builder();
