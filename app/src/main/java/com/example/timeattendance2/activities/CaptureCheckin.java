@@ -144,7 +144,7 @@ public class CaptureCheckin extends AppCompatActivity {
                 + "token :" + token + "\n"
                 + "Latitude : " + Latitude + "\n"
                 + "Longitude :" + Longitude + "\n"
-                + "Image :" + Image.toString() + "\n"
+                + "Image :" + Image.length + "\n"
                 + "staffid :" + staff_id + "\n"
                 + "siteIndex :" + siteIndex + "\n"
                 + "timeStamp :" + timeStamp + "\n"

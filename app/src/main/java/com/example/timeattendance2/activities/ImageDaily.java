@@ -36,15 +36,13 @@ import retrofit2.Response;
 
 public class ImageDaily extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
-    public static final String EXTRA_TEXT = "com.example.application.example.EXTRA_TEXT";
-    public static final String EXTRA_TEXT2 = "com.example.application.example.EXTRA_TEXT2";
-
     RadioButton radioButton;
     RadioGroup radioGroup;
     Button backBtn, confirmBtn, dateSelector;
     Spinner spinner;
     //
     Sites[] getSites;
+    String selectedSite, selectedType;
 
     //Data for request
     float request_id, fromTime, toTime;
@@ -112,9 +110,8 @@ public class ImageDaily extends AppCompatActivity implements AdapterView.OnItemS
 
             int radioId = radioGroup.getCheckedRadioButtonId();
             radioButton = findViewById(radioId);
-            String textRadio = radioButton.getText().toString();
-
-            String textSpn = spinner.getSelectedItem().toString();
+            selectedType = radioButton.getText().toString();
+            selectedSite = spinner.getSelectedItem().toString();
             callApi();
 
         /*    if (!textSpn.equals("Select Unit")) {
@@ -141,6 +138,11 @@ public class ImageDaily extends AppCompatActivity implements AdapterView.OnItemS
                         Images[] imgs = imagesResponse.getImages();
                         //Toast.makeText(ImageDaily.this, imgs.length, Toast.LENGTH_LONG).show();
                         //Log.i("IMAGES RESPONSE", imagesResponse.toString());
+                        if (imgs.length > 0) {
+                            imageThumbnailCheckIn(imgs, selectedSite, selectedType);
+                        } else {
+                            Toast.makeText(ImageDaily.this, "No data on specific date", Toast.LENGTH_LONG).show();
+                        }
                     } else {
                         Log.i("IMAGES RESPONSE", imagesResponse.getError_message());
                         Toast.makeText(ImageDaily.this, imagesResponse.getError_message(), Toast.LENGTH_LONG).show();
@@ -176,10 +178,15 @@ public class ImageDaily extends AppCompatActivity implements AdapterView.OnItemS
         Toast.makeText(this, "Selected Radio Button" + radioButton.getText(), Toast.LENGTH_SHORT).show();
     }
 
-    public void imageThumbnailCheckIn(String textRadio, String textSpn) {
+    public void imageThumbnailCheckIn(Images[] images, String site, String type) {
         Intent intent = new Intent(this, ImageDailyThumbnail.class);
-        intent.putExtra(EXTRA_TEXT, textRadio);
-        intent.putExtra(EXTRA_TEXT2, textSpn);
+        intent.putExtra("token", token);
+        intent.putExtra("request_id", request_id);
+        intent.putExtra("getSites", getSites);
+
+        intent.putExtra("detail", images);
+        intent.putExtra("textSpan", site);
+        intent.putExtra("textRadio", type);
         startActivity(intent);
     }
 
@@ -194,6 +201,7 @@ public class ImageDaily extends AppCompatActivity implements AdapterView.OnItemS
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         String text = parent.getItemAtPosition(position).toString();
+        selectedSite = text;
         Toast.makeText(parent.getContext(), text, Toast.LENGTH_SHORT).show();
     }
 

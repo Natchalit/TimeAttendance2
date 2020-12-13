@@ -31,7 +31,7 @@ public interface Api {
             @Field("token") String token,
             @Field("latitude") float Latitude,
             @Field("longitude") float Longitude,
-            @Field("Image") byte[] Image,
+            @Field("image") byte[] Image,
             @Field("staff_id") int staff_id,
             @Field("siteid") int siteIndex,
             @Field("timeStamp") float timeStamp,
