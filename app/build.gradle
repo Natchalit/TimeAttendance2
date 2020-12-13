@@ -38,7 +38,7 @@ dependencies {
 
     //ML Kit
 //    implementation 'com.google.android.gms:play-services-mlkit-barcode-scanning:16.1.2'
-    implementation 'com.google.mlkit:barcode-scanning:16.0.3'
+    implementation 'com.google.mlkit:barcode-scanning:16.1.0'
 
     //StepView
     implementation 'com.shuhart.stepview:stepview:1.5.1'

@@ -31,7 +31,7 @@ public class OleAutomationDateUtil {
         return c.getTime();
     }
 
-    public String convertToOADate(Date date) throws ParseException {
+    public static String convertToOADate(Date date) throws ParseException {
         double oaDate;
         SimpleDateFormat myFormat = new SimpleDateFormat("dd MM yyyy", Locale.US);
         Date baseDate = myFormat.parse("30 12 1899");

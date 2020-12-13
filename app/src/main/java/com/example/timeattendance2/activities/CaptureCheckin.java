@@ -21,6 +21,7 @@ import com.example.timeattendance2.R;
 import com.example.timeattendance2.api.RetrofitClient;
 import com.example.timeattendance2.model.Sites;
 import com.example.timeattendance2.model.StampResponse;
+import com.example.timeattendance2.utils.OleAutomationDateUtil;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.Task;
@@ -33,6 +34,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -54,7 +56,7 @@ public class CaptureCheckin extends AppCompatActivity {
     String token;
     float Latitude, Longitude, request_id;
     int staffid, siteIndex;
-    long timeStamp;
+    float timeStamp;
     byte[] Image;
     boolean isCheckIn = true;
 
@@ -129,9 +131,14 @@ public class CaptureCheckin extends AppCompatActivity {
     }
 
     private void dataCaptureUser() {
+        try {
+            Date currentTime = Calendar.getInstance().getTime();
+            String a = OleAutomationDateUtil.convertToOADate(currentTime);
+            timeStamp = Float.parseFloat(a);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
 
-        Date currentTime = Calendar.getInstance().getTime();
-        timeStamp = currentTime.getTime();
         Call<StampResponse> call = RetrofitClient
                 .getInstance()
                 .getApi()

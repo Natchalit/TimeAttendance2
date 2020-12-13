@@ -5,11 +5,10 @@ import com.example.timeattendance2.model.DoReportResponse2;
 import com.example.timeattendance2.model.DoReportResponse3;
 import com.example.timeattendance2.model.Images;
 import com.example.timeattendance2.model.LogResponse;
-import com.example.timeattendance2.model.StampResponse;
 import com.example.timeattendance2.model.LoginResponse;
+import com.example.timeattendance2.model.StampResponse;
 
 import retrofit2.Call;
-import retrofit2.Response;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
@@ -34,7 +33,7 @@ public interface Api {
             @Field("Image") byte[] Image,
             @Field("staffid") int staffid,
             @Field("siteIndex") int siteIndex,
-            @Field("timeStamp") long timeStamp,
+            @Field("timeStamp") float timeStamp,
             @Field("isCheckIn") boolean isCheckIn,
             @Field("request_id") float request_id
     );
