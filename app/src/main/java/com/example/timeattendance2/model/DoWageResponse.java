@@ -1,16 +1,16 @@
 package com.example.timeattendance2.model;
 
-public class LogResponse {
+public class DoWageResponse {
     private boolean completed;
     private String error_message;
     private float request_id;
-    private String logUrl;
+    private String wageUrl;
 
-    public LogResponse(boolean completed, String error_message, float request_id, String logUrl) {
+    public DoWageResponse(boolean completed, String error_message, float request_id, String wageUrl) {
         this.completed = completed;
         this.error_message = error_message;
         this.request_id = request_id;
-        this.logUrl = logUrl;
+        this.wageUrl = wageUrl;
     }
 
     public boolean isCompleted() {
@@ -25,7 +25,7 @@ public class LogResponse {
         return request_id;
     }
 
-    public String getLogUrl() {
-        return logUrl;
+    public String getWageUrl() {
+        return wageUrl;
     }
 }

@@ -24,7 +24,6 @@ import com.example.timeattendance2.model.StampResponse;
 import com.example.timeattendance2.utils.OleAutomationDateUtil;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.Task;
 import com.google.mlkit.vision.barcode.Barcode;
 import com.google.mlkit.vision.barcode.BarcodeScanner;
 import com.google.mlkit.vision.barcode.BarcodeScanning;
@@ -38,7 +37,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 import retrofit2.Call;
@@ -48,28 +46,25 @@ import retrofit2.Response;
 public class CaptureCheckin extends AppCompatActivity {
     private static final String[] CAMERA_PERMISSION = new String[]{Manifest.permission.CAMERA};
     private static final int CAMERA_REQUEST_CODE = 10;
-    private int locationRequestCode = 1000;
 
     ImageView imageView;
 
     InputImage image;
     String token;
     float Latitude, Longitude, request_id;
-    int staffid, siteIndex;
+    int staff_id, siteIndex;
     float timeStamp;
     byte[] Image;
     boolean isCheckIn = true;
 
     Sites site;
-    private FusedLocationProviderClient fusedLocationClient;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_capture_checkin);
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         Intent getData = getIntent();
         site = (Sites) getData.getSerializableExtra("site");
@@ -79,11 +74,11 @@ public class CaptureCheckin extends AppCompatActivity {
         token = getData.getStringExtra("token");
         request_id = getData.getFloatExtra("request_id", 0);
 
-        Button captureBtn = (Button) findViewById(R.id.captureBtn);
-        Button backBtn = (Button) findViewById(R.id.backBtn);
-        Button finishCheckInBtn = (Button) findViewById(R.id.finishBtn);
-        TextView unitName = (TextView) findViewById(R.id.unitName);
-        imageView = (ImageView) findViewById(R.id.imageView);
+        Button captureBtn = findViewById(R.id.captureBtn);
+        Button backBtn = findViewById(R.id.backBtn);
+        Button finishCheckInBtn = findViewById(R.id.finishBtn);
+        TextView unitName = findViewById(R.id.unitName);
+        imageView = findViewById(R.id.imageView);
 
         unitName.setText(site.getName());
 
@@ -97,6 +92,7 @@ public class CaptureCheckin extends AppCompatActivity {
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            int locationRequestCode = 1000;
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
                     locationRequestCode);
         }
@@ -142,14 +138,14 @@ public class CaptureCheckin extends AppCompatActivity {
         Call<StampResponse> call = RetrofitClient
                 .getInstance()
                 .getApi()
-                .stampUser(token, Latitude, Longitude, Image, staffid, siteIndex, timeStamp, isCheckIn, request_id);
+                .stampUser(token, Latitude, Longitude, Image, staff_id, siteIndex, timeStamp, isCheckIn, request_id);
 
         Log.d("REQ", "request_id :" + request_id + "\n"
                 + "token :" + token + "\n"
                 + "Latitude : " + Latitude + "\n"
                 + "Longitude :" + Longitude + "\n"
                 + "Image :" + Image.toString() + "\n"
-                + "staffid :" + staffid + "\n"
+                + "staffid :" + staff_id + "\n"
                 + "siteIndex :" + siteIndex + "\n"
                 + "timeStamp :" + timeStamp + "\n"
                 + "isCheckIn :" + isCheckIn + "\n"
@@ -176,6 +172,7 @@ public class CaptureCheckin extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (data == null || data.getExtras() == null) return;
         File returnFile = new File((String) data.getExtras().get("uri"));
         Uri paths = Uri.fromFile(returnFile);
         try {
@@ -184,7 +181,7 @@ public class CaptureCheckin extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        if (data != null && resultCode == RESULT_OK && requestCode == CAMERA_REQUEST_CODE) {
+        if (resultCode == RESULT_OK && requestCode == CAMERA_REQUEST_CODE) {
 
             imageView.setImageURI(paths);
             try {
@@ -229,14 +226,14 @@ public class CaptureCheckin extends AppCompatActivity {
     private void scanBarcodes(InputImage image) {
 
         BarcodeScanner scanner = BarcodeScanning.getClient();
-        Task<List<Barcode>> result = scanner.process(image)
+        scanner.process(image)
                 .addOnSuccessListener(barcodes -> {
                     for (Barcode barcode : barcodes) {
                         String rawValue = barcode.getRawValue();
-                        if (!rawValue.isEmpty()) {
+                        if (rawValue != null && !rawValue.isEmpty()) {
                             Toast.makeText(CaptureCheckin.this, rawValue, Toast.LENGTH_SHORT).show();
                             try {
-                                staffid = Integer.parseInt(rawValue);
+                                staff_id = Integer.parseInt(rawValue);
                                 dataCaptureUser();
                             } catch (Exception e) {
                                 Toast.makeText(CaptureCheckin.this, "Can't parse Staff ID from " + rawValue, Toast.LENGTH_SHORT).show();

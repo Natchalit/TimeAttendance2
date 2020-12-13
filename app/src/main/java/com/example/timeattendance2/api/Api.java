@@ -3,7 +3,8 @@ package com.example.timeattendance2.api;
 import com.example.timeattendance2.model.DoReportResponse1;
 import com.example.timeattendance2.model.DoReportResponse2;
 import com.example.timeattendance2.model.DoReportResponse3;
-import com.example.timeattendance2.model.Images;
+import com.example.timeattendance2.model.DoWageResponse;
+import com.example.timeattendance2.model.GetImage;
 import com.example.timeattendance2.model.LogResponse;
 import com.example.timeattendance2.model.LoginResponse;
 import com.example.timeattendance2.model.StampResponse;
@@ -28,11 +29,11 @@ public interface Api {
     @POST("stamp")
     Call<StampResponse> stampUser(
             @Field("token") String token,
-            @Field("Latitude") float Latitude,
-            @Field("Longitude") float Longitude,
+            @Field("latitude") float Latitude,
+            @Field("longitude") float Longitude,
             @Field("Image") byte[] Image,
-            @Field("staffid") int staffid,
-            @Field("siteIndex") int siteIndex,
+            @Field("staff_id") int staff_id,
+            @Field("siteid") int siteIndex,
             @Field("timeStamp") float timeStamp,
             @Field("isCheckIn") boolean isCheckIn,
             @Field("request_id") float request_id
@@ -42,8 +43,8 @@ public interface Api {
     @POST("doLog")
     Call<LogResponse> doLog(
             @Field("token") String token,
-            @Field("siteIndex") int siteIndex,
-            @Field("formTime") float formTime,
+            @Field("siteid") int siteIndex,
+            @Field("fromTime") float fromTime,
             @Field("toTime") float toTime,
             @Field("request_id") float request_id
     );
@@ -65,20 +66,33 @@ public interface Api {
     );
 
     @FormUrlEncoded
-    @POST("doReport2")
+    @POST("doReport3")
     Call<DoReportResponse3> doReport3(
             @Field("token") String token,
             @Field("request_id") float request_id
     );
 
     @FormUrlEncoded
-    @POST
-    Call<Images> images(
+    @POST("getimages")
+    Call<GetImage> images(
             @Field("token") String token,
-            @Field("siteIndex") int siteIndex,
+            @Field("siteid") int siteIndex,
             @Field("fromTime") float fromTime,
             @Field("toTime") float toTime,
             @Field("isCheckin") boolean isCheckin,
             @Field("request_id") float request_id
     );
+
+
+    @FormUrlEncoded
+    @POST("doWage")
+    Call<DoWageResponse> doWage(
+            @Field("token") String token,
+            @Field("siteid") int siteIndex,
+            @Field("fromTime") float fromTime,
+            @Field("toTime") float toTime,
+            @Field("request_id") float request_id
+    );
+
+
 }

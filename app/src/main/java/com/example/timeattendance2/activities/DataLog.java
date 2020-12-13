@@ -55,15 +55,11 @@ public class DataLog extends AppCompatActivity implements AdapterView.OnItemSele
         token = getData.getStringExtra("token");
         getSites = (Sites[]) getData.getSerializableExtra("getSites");
 
-//        setGetDate();
         unitList();
-//        confirmBtn(token);
-
         backBtn = findViewById(R.id.backBtn);
-        spinner = (Spinner) findViewById(R.id.selectUnitSpn);
-        confirmBtn = (Button) findViewById(R.id.confirmBtn);
-        dateSelector = (Button) findViewById(R.id.dateSelector);
-
+        spinner = findViewById(R.id.selectUnitSpn);
+        confirmBtn = findViewById(R.id.confirmBtn);
+        dateSelector = findViewById(R.id.dateSelector);
 
         backBtn.setOnClickListener(v -> dashboardAdmin(request_id, token, getSites));
 
@@ -82,30 +78,31 @@ public class DataLog extends AppCompatActivity implements AdapterView.OnItemSele
             Log.d("DatePicker Activity", "Date String = " + picker.getHeaderText() + " Date epoch " + v.first + " to " + v.second);
 
             confirmBtn.setEnabled(true);
-            Calendar cal = Calendar.getInstance();
-            cal.setTimeInMillis(v.first);
-            Date aTime = cal.getTime();
-            cal.setTimeInMillis(v.second);
-            Date bTime = cal.getTime();
             try {
-                String a = OleAutomationDateUtil.convertToOADate(aTime);
-                String b = OleAutomationDateUtil.convertToOADate(bTime);
-                fromTime = Float.parseFloat(a);
-                toTime = Float.parseFloat(b);
+                if (v.first != null && v.second != null) {
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTimeInMillis(v.first);
+                    Date aTime = cal.getTime();
+                    cal.setTimeInMillis(v.second);
+                    Date bTime = cal.getTime();
+                    String a = OleAutomationDateUtil.convertToOADate(aTime);
+                    String b = OleAutomationDateUtil.convertToOADate(bTime);
+                    fromTime = Float.parseFloat(a);
+                    toTime = Float.parseFloat(b);
+                }
             } catch (ParseException e) {
                 e.printStackTrace();
             }
 
         });
 
-        confirmBtn.setOnClickListener((View.OnClickListener) v -> {
+        confirmBtn.setOnClickListener(v -> {
             Sites site = (Sites) spinner.getSelectedItem();
             siteIndex = site.getIndex();
             callApi();
         });
 
         dateSelector.setOnClickListener(v -> picker.show(this.getSupportFragmentManager(), picker.toString()));
-        ;
 
 
     }
@@ -122,15 +119,15 @@ public class DataLog extends AppCompatActivity implements AdapterView.OnItemSele
             public void onResponse(Call<LogResponse> call, Response<LogResponse> response) {
 
                 LogResponse logResponse = response.body();
-
-                if (logResponse.isCompleted()) {
-                    String logUrl = logResponse.getLoUrl();
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setData(Uri.parse(logUrl));
-                    startActivity(intent);
-
-                } else {
-                    Toast.makeText(DataLog.this, logResponse.getError_message(), Toast.LENGTH_LONG).show();
+                if (logResponse != null) {
+                    if (logResponse.isCompleted()) {
+                        String logUrl = logResponse.getLogUrl();
+                        Toast.makeText(DataLog.this, logUrl, Toast.LENGTH_LONG).show();
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(logUrl));
+                        startActivity(browserIntent);
+                    } else {
+                        Toast.makeText(DataLog.this, logResponse.getError_message(), Toast.LENGTH_LONG).show();
+                    }
                 }
             }
 
@@ -159,7 +156,7 @@ public class DataLog extends AppCompatActivity implements AdapterView.OnItemSele
         List<Sites> sitesList = new ArrayList<>();
         Collections.addAll(sitesList, sites);
 
-        ArrayAdapter<Sites> adapter = new ArrayAdapter<Sites>(this, android.R.layout.simple_spinner_item, sitesList);
+        ArrayAdapter<Sites> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, sitesList);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(this);

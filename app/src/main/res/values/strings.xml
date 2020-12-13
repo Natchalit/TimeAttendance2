@@ -6,6 +6,10 @@
     <string name="select_unit">Select unit</string>
     <string name="confirm">Confirm</string>
     <string name="date_selector">Date Selector</string>
+    <string name="administrator">Administrator</string>
+    <string name="log_out">Log out</string>
+    <string name="administrator_payroll">Administrator - Payroll</string>
+    <string name="please_select">Please Select</string>
     <string-array name="units">
         <item>Select Unit</item>
         <item>Unit1</item>
@@ -18,14 +22,13 @@
     <string-array name="configs">
         <item>Config</item>
         <item>Config File</item>
-        <item>Config</item>
     </string-array>
 
     <string-array name="reports">
         <item>Report</item>
         <item>Data Log</item>
-        <item>Image</item>
-        <item>Payroll</item>
+        <item>Images</item>
+        <item>Pay Roll</item>
         <item>Wage per site</item>
     </string-array>
 

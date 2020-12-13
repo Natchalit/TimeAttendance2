@@ -3,19 +3,19 @@ package com.example.timeattendance2.model;
 import java.io.Serializable;
 
 public class Images implements Serializable {
-    private int staffid;
+    private int staffId;
     private String staffName,url;
     private float timeStamp;
 
-    public Images(int staffid, String staffName, String url, float timeStamp) {
-        this.staffid = staffid;
+    public Images(int staffId, String staffName, String url, float timeStamp) {
+        this.staffId = staffId;
         this.staffName = staffName;
         this.url = url;
         this.timeStamp = timeStamp;
     }
 
     public int getStaffid() {
-        return staffid;
+        return staffId;
     }
 
     public String getStaffName() {

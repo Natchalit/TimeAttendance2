@@ -6,7 +6,6 @@ import android.os.Environment;
 import android.util.Log;
 import android.util.Size;
 import android.widget.Button;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -115,8 +114,6 @@ public class CameraActivity extends AppCompatActivity {
             public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
                 String msg = "Photo capture succeeded:" + file.getAbsolutePath();
                 Log.d("PHOTO", msg);
-                runOnUiThread(() -> Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show());
-
                 Intent intent = new Intent().putExtra("uri", file.toString());
                 setResult(RESULT_OK, intent);
                 finish();

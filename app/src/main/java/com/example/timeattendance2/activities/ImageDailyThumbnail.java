@@ -1,13 +1,12 @@
 package com.example.timeattendance2.activities;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.timeattendance2.R;
 
@@ -26,10 +25,10 @@ public class ImageDailyThumbnail extends AppCompatActivity {
         String textRadio = intent.getStringExtra(ImageDaily.EXTRA_TEXT);
         String textSpn = intent.getStringExtra(ImageDaily.EXTRA_TEXT2);
 
-        showDetail = (TextView)findViewById(R.id.showDetail);
-        showDetail.setText(textSpn+"  "+textRadio);
+        showDetail = findViewById(R.id.showDetail);
+        showDetail.setText(String.format("%s %s", textSpn, textRadio));
 
-        gridView = (GridView) findViewById(R.id.gridView);
+        gridView = findViewById(R.id.gridView);
         gridView.setAdapter(new ImageAdapter(this));
 
 
@@ -38,12 +37,7 @@ public class ImageDailyThumbnail extends AppCompatActivity {
 
     public void backBtn() {
         backBtn = findViewById(R.id.backBtn);
-        backBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                imageDaily();
-            }
-        });
+        backBtn.setOnClickListener(v -> imageDaily());
     }
 
     public void imageDaily() {

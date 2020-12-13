@@ -1,7 +1,5 @@
 package com.example.timeattendance2.activities;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -11,12 +9,15 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.timeattendance2.R;
 import com.example.timeattendance2.model.Sites;
 
 public class Payroll extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
     Button backBtn, confirmBtn;
+    Spinner spinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +29,8 @@ public class Payroll extends AppCompatActivity implements AdapterView.OnItemSele
         String token = getData.getStringExtra("token");
         Sites[] getSites = (Sites[]) getData.getSerializableExtra("getSites");
 
-        Spinner spinner = findViewById(R.id.payrollList);
+        spinner = findViewById(R.id.payrollList);
+        confirmBtn = findViewById(R.id.confirmBtn);
 
         backBtn(request_id, token, getSites);
         payrollList(spinner);
@@ -37,23 +39,14 @@ public class Payroll extends AppCompatActivity implements AdapterView.OnItemSele
 
     public void backBtn(float request_id, String token, Sites[] getSites) {
         backBtn = findViewById(R.id.backBtn);
-        backBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dashboardAdmin(request_id, token, getSites);
-            }
-        });
+        backBtn.setOnClickListener(v -> dashboardAdmin(request_id, token, getSites));
     }
 
     public void conFirmBtn(Spinner spinner, float request_id, String token, Sites[] getSites) {
-        confirmBtn = findViewById(R.id.confirmBtn);
-        confirmBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String text = spinner.getSelectedItem().toString();
-                if (text.equals("Make report")) {
-                    makeReport(request_id, token, getSites);
-                }
+        confirmBtn.setOnClickListener(v -> {
+            String text = spinner.getSelectedItem().toString();
+            if (text.equals("Make report")) {
+                makeReport(request_id, token, getSites);
             }
         });
     }
@@ -85,7 +78,6 @@ public class Payroll extends AppCompatActivity implements AdapterView.OnItemSele
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         String text = parent.getItemAtPosition(position).toString();
         Toast.makeText(parent.getContext(), text, Toast.LENGTH_SHORT).show();
-
     }
 
     @Override

@@ -5,13 +5,13 @@ public class DoReportResponse1 {
     private boolean completed;
     private String error_message;
     private float request_id;
-    private String report1_url;
+    private String report1_Url;
 
-    public DoReportResponse1(boolean completed, String error_message, float request_id, String report1_url) {
+    public DoReportResponse1(boolean completed, String error_message, float request_id, String report1_Url) {
         this.completed = completed;
         this.error_message = error_message;
         this.request_id = request_id;
-        this.report1_url = report1_url;
+        this.report1_Url = report1_Url;
     }
 
     public boolean isCompleted() {
@@ -27,6 +27,6 @@ public class DoReportResponse1 {
     }
 
     public String getReport1_url() {
-        return report1_url;
+        return report1_Url;
     }
 }

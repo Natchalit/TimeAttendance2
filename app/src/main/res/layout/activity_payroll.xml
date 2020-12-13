@@ -25,7 +25,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Administrator - Payroll"
+                android:text="@string/administrator_payroll"
                 android:textAlignment="center"
                 android:textColor="@color/black"
                 android:textSize="32sp"
@@ -42,7 +42,7 @@
                 android:layout_height="match_parent"
                 android:backgroundTint="#1DACFB"
                 android:gravity="center"
-                android:text="Back"
+                android:text="@string/back"
                 android:textAlignment="center" />
         </LinearLayout>
 
@@ -50,7 +50,7 @@
     </LinearLayout>
 
     <androidx.cardview.widget.CardView
-        android:layout_width="691px"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:cardBackgroundColor="#CFEEFF"
         app:cardCornerRadius="20dp"
@@ -63,15 +63,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="20dp"
+            android:paddingStart="100dp"
+            android:paddingEnd="100dp">
 
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="20dp"
                 android:layout_marginTop="40dp"
                 android:layout_marginRight="20dp"
-                android:text="Please Select"
+                android:text="@string/please_select"
                 android:textAlignment="center"
                 android:textColor="@color/black"
                 android:textSize="42sp"
@@ -86,8 +89,8 @@
                 android:background="@drawable/bg_spinner"
                 android:dropDownSelector="@color/gray"
                 android:entries="@array/payrolls"
-                android:paddingLeft="20dp"
-                android:paddingRight="40dp" />
+                android:paddingStart="20dp"
+                android:paddingEnd="40dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -105,14 +108,9 @@
                     android:layout_width="150dp"
                     android:layout_height="wrap_content"
                     android:backgroundTint="#1DACFB"
-                    android:text="Confirm" />
-
-
+                    android:text="@string/confirm" />
             </LinearLayout>
-
         </LinearLayout>
-
-
     </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
