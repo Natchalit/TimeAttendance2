@@ -37,12 +37,7 @@ public class DashboardAdmin extends AppCompatActivity {
 
     public void backBtn(float request_id, String token, Sites[] getSites) {
         signOutBtn = findViewById(R.id.logOutBtn);
-        signOutBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mainMenus(request_id, token, getSites);
-            }
-        });
+        signOutBtn.setOnClickListener(v -> mainMenus(request_id, token, getSites));
     }
 
     public void mainMenus(float request_id, String token, Sites[] getSites) {

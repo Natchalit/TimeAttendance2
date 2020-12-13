@@ -139,8 +139,8 @@ public class ImageDaily extends AppCompatActivity implements AdapterView.OnItemS
 
                     if (imagesResponse.isCompleted()) {
                         Images[] imgs = imagesResponse.getImages();
-                        Toast.makeText(ImageDaily.this, imgs.length, Toast.LENGTH_LONG).show();
-                        Log.i("IMAGES RESPONSE", imagesResponse.toString());
+                        //Toast.makeText(ImageDaily.this, imgs.length, Toast.LENGTH_LONG).show();
+                        //Log.i("IMAGES RESPONSE", imagesResponse.toString());
                     } else {
                         Log.i("IMAGES RESPONSE", imagesResponse.getError_message());
                         Toast.makeText(ImageDaily.this, imagesResponse.getError_message(), Toast.LENGTH_LONG).show();

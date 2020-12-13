@@ -148,11 +148,14 @@ public class WagePerSite extends AppCompatActivity implements AdapterView.OnItem
 
     public void backBtn() {
         backBtn = findViewById(R.id.backBtn);
-        backBtn.setOnClickListener(v -> dashboardAdmin());
+        backBtn.setOnClickListener(v -> dashboardAdmin(request_id, token, getSites));
     }
 
-    public void dashboardAdmin() {
+    public void dashboardAdmin(float request_id, String token, Sites[] getSites) {
         Intent intent = new Intent(this, DashboardAdmin.class);
+        intent.putExtra("token", token);
+        intent.putExtra("getSites", getSites);
+        intent.putExtra("request_id", request_id);
         startActivity(intent);
     }
 

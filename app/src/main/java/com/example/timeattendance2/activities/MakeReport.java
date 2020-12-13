@@ -45,6 +45,10 @@ public class MakeReport extends AppCompatActivity {
     String token;
     float fromTime, toTime, request_id;
 
+    String savedUrl1 = null;
+    String savedUrl2 = null;
+    String savedUrl3 = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -125,10 +129,11 @@ public class MakeReport extends AppCompatActivity {
                         DoReportResponse1 r = response.body();
                         if (r != null) {
                             if (r.isCompleted()) {
-                                Toast.makeText(MakeReport.this, String.valueOf(r.getRequest_id()), Toast.LENGTH_LONG).show();
+                                Toast.makeText(MakeReport.this, "Make Report 1 Success", Toast.LENGTH_LONG).show();
                                 stepView.go(step, true);
                                 dateSelector.setEnabled(false);
                                 makeReportTv.setText(String.format("Make Report %s", step + 2));
+                                savedUrl1 = r.getReport1_url();
                                 step++;
                             } else {
                                 Toast.makeText(MakeReport.this, r.getError_message(), Toast.LENGTH_LONG).show();
@@ -153,12 +158,12 @@ public class MakeReport extends AppCompatActivity {
                         DoReportResponse2 r = response.body();
                         if (r != null) {
                             if (r.isCompleted()) {
-                                Toast.makeText(MakeReport.this, r.getReport2_url(), Toast.LENGTH_LONG).show();
-
+                                Toast.makeText(MakeReport.this, "Make Report 2 Success", Toast.LENGTH_LONG).show();
                                 stepView.go(step, true);
                                 resetTV.setEnabled(false);
                                 resetTV.setVisibility(View.INVISIBLE);
                                 makeReportTv.setText(String.format("Make Report %s", step + 2));
+                                savedUrl2 = r.getReport2_url();
                                 step++;
                             } else {
                                 Toast.makeText(MakeReport.this, r.getError_message(), Toast.LENGTH_LONG).show();
@@ -183,11 +188,12 @@ public class MakeReport extends AppCompatActivity {
                         DoReportResponse3 r = response.body();
                         if (r != null) {
                             if (r.isCompleted()) {
-                                Toast.makeText(MakeReport.this, r.getReport3_url(), Toast.LENGTH_LONG).show();
-
+                                Toast.makeText(MakeReport.this, "Make Report 3 Success", Toast.LENGTH_LONG).show();
                                 stepView.go(step, true);
                                 dateSelector.setEnabled(false);
                                 makeReportTv.setText(String.format("Make Report %s", step + 1));
+                                confirmBtn.setEnabled(false);
+                                savedUrl3 = r.getReport3_url();
                                 step++;
                             } else {
                                 Toast.makeText(MakeReport.this, r.getError_message(), Toast.LENGTH_LONG).show();
@@ -208,8 +214,9 @@ public class MakeReport extends AppCompatActivity {
         resetTV.setOnClickListener(v -> {
             step = 0;
             stepView.go(step, true);
-            makeReportTv.setText("Make Report");
+            makeReportTv.setText("Make Report 1");
             dateSelector.setEnabled(true);
+            confirmBtn.setEnabled(true);
         });
     }
 
@@ -247,6 +254,9 @@ public class MakeReport extends AppCompatActivity {
         intent.putExtra("token", token);
         intent.putExtra("request_id", request_id);
         intent.putExtra("getSites", getSites);
+        intent.putExtra("savedUrl1", savedUrl1);
+        intent.putExtra("savedUrl2", savedUrl2);
+        intent.putExtra("savedUrl3", savedUrl3);
         startActivity(intent);
     }
 }

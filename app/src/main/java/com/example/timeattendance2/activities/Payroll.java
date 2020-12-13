@@ -1,9 +1,8 @@
 package com.example.timeattendance2.activities;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
@@ -14,10 +13,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.timeattendance2.R;
 import com.example.timeattendance2.model.Sites;
 
-public class Payroll extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+public class Payroll extends AppCompatActivity {
 
     Button backBtn, confirmBtn;
     Spinner spinner;
+
+    String savedUrl1 = null;
+    String savedUrl2 = null;
+    String savedUrl3 = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,7 +30,11 @@ public class Payroll extends AppCompatActivity implements AdapterView.OnItemSele
         Intent getData = getIntent();
         float request_id = getData.getFloatExtra("request_id", 0);
         String token = getData.getStringExtra("token");
+        savedUrl1 = getData.getStringExtra("savedUrl1");
+        savedUrl2 = getData.getStringExtra("savedUrl2");
+        savedUrl3 = getData.getStringExtra("savedUrl3");
         Sites[] getSites = (Sites[]) getData.getSerializableExtra("getSites");
+
 
         spinner = findViewById(R.id.payrollList);
         confirmBtn = findViewById(R.id.confirmBtn);
@@ -44,10 +51,11 @@ public class Payroll extends AppCompatActivity implements AdapterView.OnItemSele
 
     public void conFirmBtn(Spinner spinner, float request_id, String token, Sites[] getSites) {
         confirmBtn.setOnClickListener(v -> {
-            String text = spinner.getSelectedItem().toString();
-            if (text.equals("Make report")) {
-                makeReport(request_id, token, getSites);
-            }
+            long id = spinner.getSelectedItemId();
+            if (id == 0) GotoReport(savedUrl1);
+            else if (id == 1) GotoReport(savedUrl2);
+            else if (id == 2) GotoReport(savedUrl3);
+            else makeReport(request_id, token, getSites);
         });
     }
 
@@ -55,7 +63,6 @@ public class Payroll extends AppCompatActivity implements AdapterView.OnItemSele
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.payrolls, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
-        spinner.setOnItemSelectedListener(this);
     }
 
     public void makeReport(float request_id, String token, Sites[] getSites) {
@@ -74,14 +81,13 @@ public class Payroll extends AppCompatActivity implements AdapterView.OnItemSele
         startActivity(intent);
     }
 
-    @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        String text = parent.getItemAtPosition(position).toString();
-        Toast.makeText(parent.getContext(), text, Toast.LENGTH_SHORT).show();
+    private void GotoReport(String file) {
+        if (file != null) {
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(file));
+            startActivity(browserIntent);
+        } else {
+            Toast.makeText(Payroll.this, "Can't find Report Url", Toast.LENGTH_SHORT).show();
+        }
     }
 
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-
-    }
 }
