@@ -43,16 +43,10 @@
             android:name=".activities.LoginAdmin"
             android:screenOrientation="landscape" />
         <activity
-            android:name=".activities.CaptureCheckout"
+            android:name=".activities.CaptureCheckInOut"
             android:screenOrientation="landscape" />
         <activity
-            android:name=".activities.CaptureCheckin"
-            android:screenOrientation="landscape" />
-        <activity
-            android:name=".activities.CheckoutPage"
-            android:screenOrientation="landscape" />
-        <activity
-            android:name=".activities.CheckinPage"
+            android:name=".activities.CheckInOutPage"
             android:screenOrientation="landscape" />
         <activity
             android:name=".activities.MainMenu"

@@ -129,12 +129,12 @@ public class MakeReport extends AppCompatActivity {
                         DoReportResponse1 r = response.body();
                         if (r != null) {
                             if (r.isCompleted()) {
+                                step++;
                                 Toast.makeText(MakeReport.this, "Make Report 1 Success", Toast.LENGTH_LONG).show();
                                 stepView.go(step, true);
                                 dateSelector.setEnabled(false);
-                                makeReportTv.setText(String.format("Make Report %s", step + 2));
+                                makeReportTv.setText(String.format("Make Report %s", step + 1));
                                 savedUrl1 = r.getReport1_url();
-                                step++;
                             } else {
                                 Toast.makeText(MakeReport.this, r.getError_message(), Toast.LENGTH_LONG).show();
                             }
@@ -158,13 +158,13 @@ public class MakeReport extends AppCompatActivity {
                         DoReportResponse2 r = response.body();
                         if (r != null) {
                             if (r.isCompleted()) {
+                                step++;
                                 Toast.makeText(MakeReport.this, "Make Report 2 Success", Toast.LENGTH_LONG).show();
                                 stepView.go(step, true);
                                 resetTV.setEnabled(false);
                                 resetTV.setVisibility(View.INVISIBLE);
-                                makeReportTv.setText(String.format("Make Report %s", step + 2));
+                                makeReportTv.setText(String.format("Make Report %s", step + 1));
                                 savedUrl2 = r.getReport2_url();
-                                step++;
                             } else {
                                 Toast.makeText(MakeReport.this, r.getError_message(), Toast.LENGTH_LONG).show();
                             }
@@ -191,10 +191,8 @@ public class MakeReport extends AppCompatActivity {
                                 Toast.makeText(MakeReport.this, "Make Report 3 Success", Toast.LENGTH_LONG).show();
                                 stepView.go(step, true);
                                 dateSelector.setEnabled(false);
-                                makeReportTv.setText(String.format("Make Report %s", step + 1));
                                 confirmBtn.setEnabled(false);
                                 savedUrl3 = r.getReport3_url();
-                                step++;
                             } else {
                                 Toast.makeText(MakeReport.this, r.getError_message(), Toast.LENGTH_LONG).show();
                             }

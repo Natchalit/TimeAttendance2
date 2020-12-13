@@ -43,11 +43,13 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class CaptureCheckin extends AppCompatActivity {
+public class CaptureCheckInOut extends AppCompatActivity {
     private static final String[] CAMERA_PERMISSION = new String[]{Manifest.permission.CAMERA};
     private static final int CAMERA_REQUEST_CODE = 10;
 
     ImageView imageView;
+    TextView textType;
+    Button finishCheckInBtn;
 
     InputImage image;
     String token;
@@ -55,9 +57,10 @@ public class CaptureCheckin extends AppCompatActivity {
     int staff_id, siteIndex;
     float timeStamp;
     byte[] Image;
-    boolean isCheckIn = true;
+    boolean isCheckIn;
 
     Sites site;
+    Sites[] getSites;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,17 +73,28 @@ public class CaptureCheckin extends AppCompatActivity {
         site = (Sites) getData.getSerializableExtra("site");
         siteIndex = site.getIndex();
 
-        Sites[] getSites = (Sites[]) getData.getSerializableExtra("getSites");
+        getSites = (Sites[]) getData.getSerializableExtra("getSites");
         token = getData.getStringExtra("token");
         request_id = getData.getFloatExtra("request_id", 0);
+        isCheckIn = getData.getBooleanExtra("isCheckin", true);
 
         Button captureBtn = findViewById(R.id.captureBtn);
         Button backBtn = findViewById(R.id.backBtn);
-        Button finishCheckInBtn = findViewById(R.id.finishBtn);
+        finishCheckInBtn = findViewById(R.id.finishBtn);
         TextView unitName = findViewById(R.id.unitName);
         imageView = findViewById(R.id.imageView);
+        textType = findViewById(R.id.typeText);
 
         unitName.setText(site.getName());
+        finishCheckInBtn.setEnabled(false);
+        if (isCheckIn) {
+            textType.setText("ลงเวลาเข้างาน\nCheck In ");
+            finishCheckInBtn.setText("Finish Check In");
+        } else {
+            textType.setText("ลงเวลาออกงาน\nCheck Out ");
+            finishCheckInBtn.setText("Finish Check Out");
+
+        }
 
         captureBtn.setOnClickListener(v -> {
             if (hasCameraPermission()) {
@@ -114,8 +128,7 @@ public class CaptureCheckin extends AppCompatActivity {
         });
 
         backBtn.setOnClickListener(v -> mainMenu(token, request_id, getSites));
-        finishCheckInBtn.setOnClickListener(v -> mainMenu(token, request_id, getSites));
-
+        finishCheckInBtn.setOnClickListener(v -> dataCaptureUser());
 
         dateRealtime();
         refreshTime();
@@ -156,6 +169,7 @@ public class CaptureCheckin extends AppCompatActivity {
             public void onResponse(Call<StampResponse> call, Response<StampResponse> response) {
                 StampResponse stampResponse = response.body();
                 if (stampResponse != null && stampResponse.isCompleted()) {
+                    mainMenu(token, request_id, getSites);
                     Log.i("STAMP RESPONSE", response.code() + ":" + response.message());
                 } else {
                     Log.i("STAMP RESPONSE", response.message());
@@ -182,10 +196,9 @@ public class CaptureCheckin extends AppCompatActivity {
         }
 
         if (resultCode == RESULT_OK && requestCode == CAMERA_REQUEST_CODE) {
-
             imageView.setImageURI(paths);
             try {
-                image = InputImage.fromFilePath(CaptureCheckin.this, paths);
+                image = InputImage.fromFilePath(CaptureCheckInOut.this, paths);
                 scanBarcodes(image);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -224,26 +237,34 @@ public class CaptureCheckin extends AppCompatActivity {
     }
 
     private void scanBarcodes(InputImage image) {
-
         BarcodeScanner scanner = BarcodeScanning.getClient();
         scanner.process(image)
                 .addOnSuccessListener(barcodes -> {
+                    if (barcodes.isEmpty()) {
+                        Toast.makeText(CaptureCheckInOut.this, "Don't have QR code in this picture", Toast.LENGTH_SHORT).show();
+                        finishCheckInBtn.setEnabled(false);
+                        return;
+                    }
                     for (Barcode barcode : barcodes) {
                         String rawValue = barcode.getRawValue();
-                        if (rawValue != null && !rawValue.isEmpty()) {
-                            Toast.makeText(CaptureCheckin.this, rawValue, Toast.LENGTH_SHORT).show();
-                            try {
-                                staff_id = Integer.parseInt(rawValue);
-                                dataCaptureUser();
-                            } catch (Exception e) {
-                                Toast.makeText(CaptureCheckin.this, "Can't parse Staff ID from " + rawValue, Toast.LENGTH_SHORT).show();
-                            }
-                        } else {
-                            Toast.makeText(CaptureCheckin.this, "Don't have QR code in this picture", Toast.LENGTH_SHORT).show();
+                        if (rawValue == null) {
+                            Toast.makeText(CaptureCheckInOut.this, "Don't have QR code in this picture", Toast.LENGTH_SHORT).show();
+                            finishCheckInBtn.setEnabled(false);
+                            return;
+                        }
+                        try {
+                            staff_id = Integer.parseInt(rawValue);
+                            finishCheckInBtn.setEnabled(true);
+                        } catch (Exception e) {
+                            Toast.makeText(CaptureCheckInOut.this, "Can't parse Staff ID from " + rawValue, Toast.LENGTH_SHORT).show();
+                            finishCheckInBtn.setEnabled(false);
                         }
                     }
                 })
-                .addOnFailureListener(e -> Toast.makeText(CaptureCheckin.this, "Can't read QR Code", Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> {
+                    Toast.makeText(CaptureCheckInOut.this, "Can't read QR Code", Toast.LENGTH_SHORT).show();
+                    finishCheckInBtn.setEnabled(false);
+                });
     }
 /*
     public void alertDialog() {

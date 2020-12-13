@@ -59,18 +59,20 @@ public class MainMenu extends AppCompatActivity {
     }
 
     public void openCheckInPage(String token, Sites[] getSites, float request_id) {
-        Intent intent = new Intent(this, CheckinPage.class);
+        Intent intent = new Intent(this, CheckInOutPage.class);
         intent.putExtra("token", token);
         intent.putExtra("getSites", getSites);
         intent.putExtra("request_id", request_id);
+        intent.putExtra("isCheckin", true);
         startActivity(intent);
     }
 
     public void openCheckOutPage(String token, Sites[] getSites, float request_id) {
-        Intent intent = new Intent(this, CheckoutPage.class);
+        Intent intent = new Intent(this, CheckInOutPage.class);
         intent.putExtra("token", token);
         intent.putExtra("getSites", getSites);
         intent.putExtra("request_id", request_id);
+        intent.putExtra("isCheckin", false);
         startActivity(intent);
     }
 
