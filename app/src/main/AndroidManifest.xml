@@ -3,19 +3,13 @@
     package="com.example.timeattendance2">
 
     <uses-permission android:name="android.permission.CAMERA" />
-
-    <uses-feature android:name="android.hardware.camera.autofocus" />
-
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission. ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
-        <uses-feature
-            android:name="android.hardware.camera2"
-            android:required="true" />
+    <uses-feature android:name="android.hardware.camera.any" />
 
     <application
         android:allowBackup="true"
@@ -25,46 +19,46 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TimeAttendance2">
         <activity
-            android:name="com.example.timeattendance2.activities.ImageDailyThumbnail"
+            android:name=".activities.ImageDailyThumbnail"
             android:screenOrientation="landscape" />
         <activity
-            android:name="com.example.timeattendance2.activities.ImageDaily"
+            android:name=".activities.ImageDaily"
             android:screenOrientation="landscape" />
         <activity
-            android:name="com.example.timeattendance2.activities.Payroll"
+            android:name=".activities.Payroll"
             android:screenOrientation="landscape" />
         <activity
-            android:name="com.example.timeattendance2.activities.WagePerSite"
+            android:name=".activities.WagePerSite"
             android:screenOrientation="landscape" />
         <activity
-            android:name="com.example.timeattendance2.activities.MakeReport"
+            android:name=".activities.MakeReport"
             android:screenOrientation="landscape" />
         <activity
-            android:name="com.example.timeattendance2.activities.DataLog"
+            android:name=".activities.DataLog"
             android:screenOrientation="landscape" />
         <activity
-            android:name="com.example.timeattendance2.activities.DashboardAdmin"
+            android:name=".activities.DashboardAdmin"
             android:screenOrientation="landscape" />
         <activity
-            android:name="com.example.timeattendance2.activities.LoginAdmin"
+            android:name=".activities.LoginAdmin"
             android:screenOrientation="landscape" />
         <activity
-            android:name="com.example.timeattendance2.activities.CaptureCheckout"
+            android:name=".activities.CaptureCheckout"
             android:screenOrientation="landscape" />
         <activity
-            android:name="com.example.timeattendance2.activities.CaptureCheckin"
+            android:name=".activities.CaptureCheckin"
             android:screenOrientation="landscape" />
         <activity
-            android:name="com.example.timeattendance2.activities.CheckoutPage"
+            android:name=".activities.CheckoutPage"
             android:screenOrientation="landscape" />
         <activity
-            android:name="com.example.timeattendance2.activities.CheckinPage"
+            android:name=".activities.CheckinPage"
             android:screenOrientation="landscape" />
         <activity
-            android:name="com.example.timeattendance2.activities.MainMenu"
+            android:name=".activities.MainMenu"
             android:screenOrientation="landscape" />
         <activity
-            android:name="com.example.timeattendance2.activities.MainActivity"
+            android:name=".activities.MainActivity"
             android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -72,6 +66,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".activities.CameraActivity" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -80,7 +75,7 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"></meta-data>
+                android:resource="@xml/file_paths" />
         </provider>
 
         <meta-data

@@ -1,141 +1,170 @@
 package com.example.timeattendance2.activities;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
-
 import android.Manifest;
-import android.content.ActivityNotFoundException;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Point;
-import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
-import android.os.Message;
-import android.provider.MediaStore;
-
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import com.example.timeattendance2.R;
 import com.example.timeattendance2.api.RetrofitClient;
 import com.example.timeattendance2.model.Sites;
 import com.example.timeattendance2.model.StampResponse;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.Task;
 import com.google.mlkit.vision.barcode.Barcode;
 import com.google.mlkit.vision.barcode.BarcodeScanner;
-import com.google.mlkit.vision.barcode.BarcodeScannerOptions;
 import com.google.mlkit.vision.barcode.BarcodeScanning;
 import com.google.mlkit.vision.common.InputImage;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class CaptureCheckin extends AppCompatActivity {
+    private static final String[] CAMERA_PERMISSION = new String[]{Manifest.permission.CAMERA};
+    private static final int CAMERA_REQUEST_CODE = 10;
+    private int locationRequestCode = 1000;
 
-    private final int CAMERA_RESULT_CODE = 100;
-    private boolean isCheckIn = true;
-    private Button captureBtn, finishCheckInBtn, backBtn;
-    private TextView unitName;
+    ImageView imageView;
 
-    Uri photoURI;
-    String currentPhotoPath;
     InputImage image;
     String token;
     float Latitude, Longitude, request_id;
     int staffid, siteIndex;
     long timeStamp;
     byte[] Image;
+    boolean isCheckIn = true;
+
+    Sites site;
+    private FusedLocationProviderClient fusedLocationClient;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_capture_checkin);
 
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
         Intent getData = getIntent();
-        Sites site = (Sites) getData.getSerializableExtra("site");
+        site = (Sites) getData.getSerializableExtra("site");
+        siteIndex = site.getIndex();
+
         Sites[] getSites = (Sites[]) getData.getSerializableExtra("getSites");
-        String token = getData.getStringExtra("token");
-        float request_id = getData.getFloatExtra("request_id", 0);
+        token = getData.getStringExtra("token");
+        request_id = getData.getFloatExtra("request_id", 0);
 
+        Button captureBtn = (Button) findViewById(R.id.captureBtn);
+        Button backBtn = (Button) findViewById(R.id.backBtn);
+        Button finishCheckInBtn = (Button) findViewById(R.id.finishBtn);
+        TextView unitName = (TextView) findViewById(R.id.unitName);
+        imageView = (ImageView) findViewById(R.id.imageView);
 
-        captureBtn = (Button) findViewById(R.id.captureBtn);
-        backBtn = (Button) findViewById(R.id.backBtn);
-
-        unitName = (TextView) findViewById(R.id.unitName);
         unitName.setText(site.getName());
 
-        setBackBtn(token, request_id, getSites);
-        setFinishCheckInBtn(token, request_id, getSites);
+        captureBtn.setOnClickListener(v -> {
+            if (hasCameraPermission()) {
+                enableCamera();
+            } else {
+                requestPermission();
+            }
+        });
 
-        setCaptureBtn();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+                    locationRequestCode);
+        }
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        fusedLocationClient.getLastLocation().addOnSuccessListener(this, location -> {
+            if (location != null) {
+                Latitude = (float) location.getLatitude();
+                Longitude = (float) location.getLongitude();
+            }
+        });
+
+        backBtn.setOnClickListener(v -> mainMenu(token, request_id, getSites));
+        finishCheckInBtn.setOnClickListener(v -> mainMenu(token, request_id, getSites));
+
+
         dateRealtime();
         refreshTime();
     }
 
+    private void enableCamera() {
+        Intent intent = new Intent(this, CameraActivity.class);
+        startActivityForResult(intent, CAMERA_REQUEST_CODE);
+    }
 
     private void dataCaptureUser() {
 
-        timeStamp = System.currentTimeMillis();
-
-
+        Date currentTime = Calendar.getInstance().getTime();
+        timeStamp = currentTime.getTime();
         Call<StampResponse> call = RetrofitClient
                 .getInstance()
                 .getApi()
                 .stampUser(token, Latitude, Longitude, Image, staffid, siteIndex, timeStamp, isCheckIn, request_id);
 
+        Log.d("REQ", "request_id :" + request_id + "\n"
+                + "token :" + token + "\n"
+                + "Latitude : " + Latitude + "\n"
+                + "Longitude :" + Longitude + "\n"
+                + "Image :" + Image.toString() + "\n"
+                + "staffid :" + staffid + "\n"
+                + "siteIndex :" + siteIndex + "\n"
+                + "timeStamp :" + timeStamp + "\n"
+                + "isCheckIn :" + isCheckIn + "\n"
+                + "request_id :" + request_id + "\n");
+
         call.enqueue(new Callback<StampResponse>() {
             @Override
             public void onResponse(Call<StampResponse> call, Response<StampResponse> response) {
                 StampResponse stampResponse = response.body();
-                if (stampResponse.isCompleted()) {
-
+                if (stampResponse != null && stampResponse.isCompleted()) {
+                    Log.i("STAMP RESPONSE", response.code() + ":" + response.message());
+                } else {
+                    Log.i("STAMP RESPONSE", response.message());
                 }
             }
 
             @Override
             public void onFailure(Call<StampResponse> call, Throwable t) {
-
-            }
-        });
-    }
-
-    public void setCaptureBtn() {
-        captureBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dispatchTakePictureIntent();
-            }
-        });
-    }
-
-    public void setBackBtn(String token, float request_id, Sites[] getSites) {
-        backBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mainMenu(token, request_id, getSites);
+                Log.e("STAMP RESPONSE", call.toString() + ":" + t.getMessage());
             }
         });
     }
@@ -143,150 +172,92 @@ public class CaptureCheckin extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        Log.i("Result", String.valueOf(data) + " " + String.valueOf(requestCode) + " " + String.valueOf(resultCode));
-        if (data != null) {
-            if (resultCode == RESULT_OK) {
-                if (requestCode == CAMERA_RESULT_CODE) {
-                    File f = new File(currentPhotoPath);
-                    Uri uri = Uri.fromFile(f);
-                    ImageView imageView = (ImageView) findViewById(R.id.imageView);
-                    imageView.setImageURI(uri);
-
-                    try {
-                        image = InputImage.fromFilePath(CaptureCheckin.this, uri);
-                        scanBarcodes(image);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            }
+        File returnFile = new File((String) data.getExtras().get("uri"));
+        Uri paths = Uri.fromFile(returnFile);
+        try {
+            Image = readFile(returnFile);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
+        if (data != null && resultCode == RESULT_OK && requestCode == CAMERA_REQUEST_CODE) {
+
+            imageView.setImageURI(paths);
+            try {
+                image = InputImage.fromFilePath(CaptureCheckin.this, paths);
+                scanBarcodes(image);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
-    private void dispatchTakePictureIntent() {
-
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        String authority = "com.example.timeattendance2.fileprovider";
-        // Ensure that there's a camera activity to handle the intent
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            // Create the File where the photo should go
-            File photoFile = null;
-            try {
-                photoFile = createImageFile();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-            // Continue only if the File was successfully created
-            if (photoFile != null) {
-                Log.i("Photo file", String.valueOf(photoFile));
-
-                photoURI = FileProvider.getUriForFile(CaptureCheckin.this,
-                        authority, photoFile);
-
-                Log.i("photoUri", String.valueOf(photoURI));
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-
-
-                try {
-                    startActivityForResult(takePictureIntent, CAMERA_RESULT_CODE);
-                } catch (ActivityNotFoundException e) {
-                    e.printStackTrace();
-                }
-            }
+    public static byte[] readFile(File file) throws IOException {
+        // Open file
+        try (RandomAccessFile f = new RandomAccessFile(file, "r")) {
+            // Get and check length
+            long longlength = f.length();
+            int length = (int) longlength;
+            if (length != longlength)
+                throw new IOException("File size >= 2 GB");
+            // Read file and return data
+            byte[] data = new byte[length];
+            f.readFully(data);
+            return data;
         }
+    }
+
+    private boolean hasCameraPermission() {
+        return ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestPermission() {
+        ActivityCompat.requestPermissions(
+                this,
+                CAMERA_PERMISSION,
+                CAMERA_REQUEST_CODE
+        );
     }
 
     private void scanBarcodes(InputImage image) {
-        BarcodeScannerOptions options =
-                new BarcodeScannerOptions.Builder()
-                        .setBarcodeFormats(
-                                Barcode.FORMAT_QR_CODE)
-                        .build();
 
         BarcodeScanner scanner = BarcodeScanning.getClient();
-
         Task<List<Barcode>> result = scanner.process(image)
-                .addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
-                    @Override
-                    public void onSuccess(List<Barcode> barcodes) {
-                        for (Barcode barcode : barcodes) {
-                            Rect bounds = barcode.getBoundingBox();
-                            Point[] corners = barcode.getCornerPoints();
-
-                            String rawValue = barcode.getRawValue();
-
-//                            if (rawValue.isEmpty()) {
-//                                Log.i("QR CODE",rawValue);
-//                                Toast.makeText(CaptureCheckin.this, rawValue, Toast.LENGTH_SHORT).show();
-//                            } else {
-//                                Log.i("QR CODE","Dont have QR CODE");
-//                                Toast.makeText(CaptureCheckin.this, "Don't have QR code in this picture", Toast.LENGTH_SHORT).show();
-//                            }
-//                            Log.d("tag", "QR Code has text : " + rawValue);
+                .addOnSuccessListener(barcodes -> {
+                    for (Barcode barcode : barcodes) {
+                        String rawValue = barcode.getRawValue();
+                        if (!rawValue.isEmpty()) {
+                            Toast.makeText(CaptureCheckin.this, rawValue, Toast.LENGTH_SHORT).show();
+                            try {
+                                staffid = Integer.parseInt(rawValue);
+                                dataCaptureUser();
+                            } catch (Exception e) {
+                                Toast.makeText(CaptureCheckin.this, "Can't parse Staff ID from " + rawValue, Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Toast.makeText(CaptureCheckin.this, "Don't have QR code in this picture", Toast.LENGTH_SHORT).show();
                         }
                     }
                 })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(CaptureCheckin.this, "Cant read QR Code", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                .addOnFailureListener(e -> Toast.makeText(CaptureCheckin.this, "Can't read QR Code", Toast.LENGTH_SHORT).show());
     }
-
-    private File createImageFile() throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        Log.i("Image file direct", String.valueOf(storageDir));
-//        File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
-
-        // Save a file: path for use with ACTION_VIEW intents
-        currentPhotoPath = image.getAbsolutePath();
-        return image;
-    }
-
+/*
     public void alertDialog() {
-        captureBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(CaptureCheckin.this);
-                builder.setTitle("Capture Alert")
-                        .setMessage("ไม่ผ่าน")
-                        .setCancelable(false)
-                        .setPositiveButton("ถ่ายรูปใหม่", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Toast.makeText(CaptureCheckin.this, "ถ่ายรูปใหม่", Toast.LENGTH_SHORT).show();
-                            }
-                        });
+        captureBtn.setOnClickListener(v -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(CaptureCheckin.this);
+            builder.setTitle("Capture Alert")
+                    .setMessage("ไม่ผ่าน")
+                    .setCancelable(false)
+                    .setPositiveButton("ถ่ายรูปใหม่", (dialog, which) -> Toast.makeText(CaptureCheckin.this, "ถ่ายรูปใหม่", Toast.LENGTH_SHORT).show());
 
-                //Creating dialog box
-                AlertDialog dialog = builder.create();
-                dialog.show();
-            }
+            //Creating dialog box
+            AlertDialog dialog = builder.create();
+            dialog.show();
         });
-    }
-
-    public void setFinishCheckInBtn(String token, float request_id, Sites[] sites) {
-        finishCheckInBtn = (Button) findViewById(R.id.finishBtn);
-        finishCheckInBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                mainMenu(token, request_id, sites);
-            }
-        });
-    }
+    }*/
 
     public void mainMenu(String token, float request_id, Sites[] getSites) {
         Intent intent = new Intent(this, MainMenu.class);
@@ -305,32 +276,20 @@ public class CaptureCheckin extends AppCompatActivity {
 
     public void refreshTime() {
 
-        SimpleDateFormat formatTime = new SimpleDateFormat("HH:mm:ss");
+        SimpleDateFormat formatTime = new SimpleDateFormat("HH:mm:ss", Locale.US);
         Date currentDate = Calendar.getInstance().getTime();
         String formattedTime = formatTime.format(currentDate);
         TextView textViewTime = findViewById(R.id.timeText);
         textViewTime.setText(formattedTime);
-
-        refresh(1000);
+        refresh();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-    private void refresh(int milliseconds) {
+    private void refresh() {
 
         final Handler handler = new Handler();
 
-        final Runnable runnable = new Runnable() {
-            @Override
+        final Runnable runnable = this::refreshTime;
 
-            public void run() {
-                refreshTime();
-            }
-        };
-
-        handler.postDelayed(runnable, milliseconds);
+        handler.postDelayed(runnable, 1000);
     }
 }
