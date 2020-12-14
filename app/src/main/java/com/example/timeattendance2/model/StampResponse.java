@@ -4,11 +4,15 @@ public class StampResponse {
     private boolean completed;
     private String error_message;
     private float request_id;
+    private String[] sites;
+    private String[] images;
 
-    public StampResponse(boolean completed, String error_message, float request_id) {
+    public StampResponse(boolean completed, String error_message, float request_id, String[] sites, String[] images) {
         this.completed = completed;
         this.error_message = error_message;
         this.request_id = request_id;
+        this.sites = sites;
+        this.images = images;
     }
 
     public boolean isCompleted() {

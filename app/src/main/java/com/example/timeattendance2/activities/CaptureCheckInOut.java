@@ -3,6 +3,8 @@ package com.example.timeattendance2.activities;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -29,8 +31,10 @@ import com.google.mlkit.vision.barcode.BarcodeScanner;
 import com.google.mlkit.vision.barcode.BarcodeScanning;
 import com.google.mlkit.vision.common.InputImage;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -140,6 +144,7 @@ public class CaptureCheckInOut extends AppCompatActivity {
     }
 
     private void dataCaptureUser() {
+        finishCheckInBtn.setText(R.string.dd);
         try {
             Date currentTime = Calendar.getInstance().getTime();
             String a = OleAutomationDateUtil.convertToOADate(currentTime);
@@ -147,40 +152,56 @@ public class CaptureCheckInOut extends AppCompatActivity {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-
         Call<StampResponse> call = RetrofitClient
                 .getInstance()
                 .getApi()
-                .stampUser(token, Latitude, Longitude, Image, staff_id, siteIndex, timeStamp, isCheckIn, request_id);
-
+                .stampUser(token, Latitude, Longitude, Image, staff_id, siteIndex, timeStamp, timeStamp, isCheckIn, request_id);
         Log.d("REQ", "request_id :" + request_id + "\n"
                 + "token :" + token + "\n"
-                + "Latitude : " + Latitude + "\n"
-                + "Longitude :" + Longitude + "\n"
-                + "Image :" + Image.length + "\n"
+                + "latitude : " + Latitude + "\n"
+                + "longitude :" + Longitude + "\n"
+                + "image :" + Image.length + "\n"
                 + "staffid :" + staff_id + "\n"
-                + "siteIndex :" + siteIndex + "\n"
+                + "siteid :" + siteIndex + "\n"
                 + "timeStamp :" + timeStamp + "\n"
-                + "isCheckIn :" + isCheckIn + "\n"
+                + "isCheckin :" + isCheckIn + "\n"
                 + "request_id :" + request_id + "\n");
 
         call.enqueue(new Callback<StampResponse>() {
             @Override
             public void onResponse(Call<StampResponse> call, Response<StampResponse> response) {
                 StampResponse stampResponse = response.body();
-                if (stampResponse != null && stampResponse.isCompleted()) {
-                    mainMenu(token, request_id, getSites);
-                    Log.i("STAMP RESPONSE", response.code() + ":" + response.message());
-                } else {
-                    Log.i("STAMP RESPONSE", response.message());
+                Toast.makeText(CaptureCheckInOut.this, "Image Length: " + Image.length, Toast.LENGTH_LONG).show();
+                if (stampResponse == null) {
+                    Toast.makeText(CaptureCheckInOut.this, "No response", Toast.LENGTH_LONG).show();
+                    return;
                 }
+                if (stampResponse.isCompleted()) {
+                    Toast.makeText(CaptureCheckInOut.this, "Success", Toast.LENGTH_LONG).show();
+                    mainMenu(token, request_id, getSites);
+                } else {
+                    String er = stampResponse.getError_message();
+                    Toast.makeText(CaptureCheckInOut.this, er, Toast.LENGTH_LONG).show();
+                    Log.i("FAILED: ", er);
+
+                }
+                setFinishTextBack();
             }
 
             @Override
             public void onFailure(Call<StampResponse> call, Throwable t) {
-                Log.e("STAMP RESPONSE", call.toString() + ":" + t.getMessage());
+                Log.e("FAILURE: ", call.toString() + ":" + t.getMessage());
+                setFinishTextBack();
             }
         });
+    }
+
+    private void setFinishTextBack() {
+        if (isCheckIn) {
+            finishCheckInBtn.setText("Finish Check In");
+        } else {
+            finishCheckInBtn.setText("Finish Check Out");
+        }
     }
 
     @Override
@@ -189,11 +210,10 @@ public class CaptureCheckInOut extends AppCompatActivity {
         if (data == null || data.getExtras() == null) return;
         File returnFile = new File((String) data.getExtras().get("uri"));
         Uri paths = Uri.fromFile(returnFile);
-        try {
-            Image = readFile(returnFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Bitmap bitmap = BitmapFactory.decodeFile((String) data.getExtras().get("uri"));
+        ByteArrayOutputStream blob = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 40, blob);
+        Image = blob.toByteArray();
 
         if (resultCode == RESULT_OK && requestCode == CAMERA_REQUEST_CODE) {
             imageView.setImageURI(paths);
@@ -204,6 +224,18 @@ public class CaptureCheckInOut extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+    }
+
+    public byte[] getBytes(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
+        int bufferSize = 1024;
+        byte[] buffer = new byte[bufferSize];
+
+        int len = 0;
+        while ((len = inputStream.read(buffer)) != -1) {
+            byteBuffer.write(buffer, 0, len);
+        }
+        return byteBuffer.toByteArray();
     }
 
     public static byte[] readFile(File file) throws IOException {
@@ -254,6 +286,7 @@ public class CaptureCheckInOut extends AppCompatActivity {
                         }
                         try {
                             staff_id = Integer.parseInt(rawValue);
+                            Toast.makeText(CaptureCheckInOut.this, "Staff ID: " + staff_id, Toast.LENGTH_LONG).show();
                             finishCheckInBtn.setEnabled(true);
                         } catch (Exception e) {
                             Toast.makeText(CaptureCheckInOut.this, "Can't parse Staff ID from " + rawValue, Toast.LENGTH_SHORT).show();

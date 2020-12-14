@@ -1,6 +1,7 @@
 package com.example.timeattendance2.activities;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -135,6 +136,7 @@ public class MakeReport extends AppCompatActivity {
                                 dateSelector.setEnabled(false);
                                 makeReportTv.setText(String.format("Make Report %s", step + 1));
                                 savedUrl1 = r.getReport1_url();
+                                gotoReport(savedUrl1);
                             } else {
                                 Toast.makeText(MakeReport.this, r.getError_message(), Toast.LENGTH_LONG).show();
                             }
@@ -165,6 +167,7 @@ public class MakeReport extends AppCompatActivity {
                                 resetTV.setVisibility(View.INVISIBLE);
                                 makeReportTv.setText(String.format("Make Report %s", step + 1));
                                 savedUrl2 = r.getReport2_url();
+                                gotoReport(savedUrl2);
                             } else {
                                 Toast.makeText(MakeReport.this, r.getError_message(), Toast.LENGTH_LONG).show();
                             }
@@ -193,6 +196,7 @@ public class MakeReport extends AppCompatActivity {
                                 dateSelector.setEnabled(false);
                                 confirmBtn.setEnabled(false);
                                 savedUrl3 = r.getReport3_url();
+                                gotoReport(savedUrl3);
                             } else {
                                 Toast.makeText(MakeReport.this, r.getError_message(), Toast.LENGTH_LONG).show();
                             }
@@ -220,6 +224,15 @@ public class MakeReport extends AppCompatActivity {
 
     public void backBtn(float request_id, String token, Sites[] getSites) {
         backBtn.setOnClickListener(v -> payRoll(request_id, token, getSites));
+    }
+
+    private void gotoReport(String file) {
+        if (file != null) {
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(file));
+            startActivity(browserIntent);
+        } else {
+            Toast.makeText(MakeReport.this, "Can't find Report Url", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void stepView() {

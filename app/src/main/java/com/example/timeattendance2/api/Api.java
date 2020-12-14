@@ -32,10 +32,11 @@ public interface Api {
             @Field("latitude") float Latitude,
             @Field("longitude") float Longitude,
             @Field("image") byte[] Image,
-            @Field("staff_id") int staff_id,
+            @Field("staffid") int staff_id,
             @Field("siteid") int siteIndex,
-            @Field("timeStamp") float timeStamp,
-            @Field("isCheckIn") boolean isCheckIn,
+            @Field("fromTime") float fromTime,
+            @Field("toTime") float toTime,
+            @Field("isCheckin") boolean isCheckIn,
             @Field("request_id") float request_id
     );
 

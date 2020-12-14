@@ -4,17 +4,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
-import android.util.Size;
 import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.CameraSelector;
-import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageCaptureException;
-import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
@@ -82,23 +79,17 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void bindImageAnalysis(@NonNull ProcessCameraProvider cameraProvider) {
-        ImageAnalysis imageAnalysis =
-                new ImageAnalysis.Builder().setTargetResolution(new Size(1280, 720))
-                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build();
-        imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this), ImageProxy::close);
-
         Preview preview = new Preview.Builder().build();
         CameraSelector cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA;
-        ImageCapture.Builder builder = new ImageCapture.Builder();
+        ImageCapture.Builder builder = new ImageCapture.Builder().setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY);
         ImageCapture imageCapture = builder.build();
-        preview.setSurfaceProvider(previewView.getSurfaceProvider());
         try {
             // Unbind use cases before rebinding
             cameraProvider.unbindAll();
 
             // Bind use cases to camera
             cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture);
-
+            preview.setSurfaceProvider(previewView.getSurfaceProvider());
         } catch (Exception exc) {
             Log.e("CAMERA", "Use case binding failed", exc);
         }
