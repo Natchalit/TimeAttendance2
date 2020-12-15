@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.util.Size;
 import android.widget.Button;
 
 import androidx.annotation.NonNull;
@@ -79,16 +80,21 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void bindImageAnalysis(@NonNull ProcessCameraProvider cameraProvider) {
+/*        ImageAnalysis imageAnalysis =
+                new ImageAnalysis.Builder().setTargetResolution(new Size(600, 800))
+                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build();
+        imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this), ImageProxy::close);*/
+
         Preview preview = new Preview.Builder().build();
         CameraSelector cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA;
-        ImageCapture.Builder builder = new ImageCapture.Builder().setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY);
+        ImageCapture.Builder builder = new ImageCapture.Builder().setTargetResolution(new Size(720, 1280)).setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY);
         ImageCapture imageCapture = builder.build();
         try {
             // Unbind use cases before rebinding
             cameraProvider.unbindAll();
 
             // Bind use cases to camera
-            cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture);
+            cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture/*, imageAnalysis*/);
             preview.setSurfaceProvider(previewView.getSurfaceProvider());
         } catch (Exception exc) {
             Log.e("CAMERA", "Use case binding failed", exc);
@@ -98,14 +104,13 @@ public class CameraActivity extends AppCompatActivity {
 
     private void takePhoto(ImageCapture imageCapture) {
         File file = getPhotoFile();
-
         ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(file).build();
         imageCapture.takePicture(outputFileOptions, executor, new ImageCapture.OnImageSavedCallback() {
             @Override
             public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
                 String msg = "Photo capture succeeded:" + file.getAbsolutePath();
                 Log.d("PHOTO", msg);
-                Intent intent = new Intent().putExtra("uri", file.toString());
+                Intent intent = new Intent().putExtra("uri", file.getAbsolutePath());
                 setResult(RESULT_OK, intent);
                 finish();
             }

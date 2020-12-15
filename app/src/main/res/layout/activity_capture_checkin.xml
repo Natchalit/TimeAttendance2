@@ -96,7 +96,6 @@
                         android:id="@+id/finishBtn"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:backgroundTint="#1DACFB"
                         android:textColor="@color/white" />
 
                     <Button
