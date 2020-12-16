@@ -23,7 +23,6 @@ import com.example.timeattendance2.R;
 import com.example.timeattendance2.api.RetrofitClient;
 import com.example.timeattendance2.model.Sites;
 import com.example.timeattendance2.model.StampResponse;
-import com.example.timeattendance2.utils.OleAutomationDateUtil;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.mlkit.vision.barcode.Barcode;
@@ -39,8 +38,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -60,8 +59,7 @@ public class CaptureCheckInOut extends AppCompatActivity {
     String token;
     float Latitude, Longitude, request_id;
     int staff_id, siteIndex;
-    float timeStamp;
-    byte[] Image;
+    ArrayList<String> Image = new ArrayList<>();
     boolean isCheckIn;
 
     Sites site;
@@ -145,34 +143,25 @@ public class CaptureCheckInOut extends AppCompatActivity {
     }
 
     private void dataCaptureUser() {
-        try {
-            Date currentTime = Calendar.getInstance().getTime();
-            String a = OleAutomationDateUtil.convertToOADate(currentTime);
-            timeStamp = Float.parseFloat(a);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+
 
         Call<StampResponse> call = RetrofitClient
                 .getInstance()
                 .getApi()
-                .stampUser(token, Latitude, Longitude, Image, staff_id, siteIndex, timeStamp, timeStamp, isCheckIn, request_id);
+                .stampUser(token, Latitude, Longitude, staff_id, siteIndex, 0, 0, isCheckIn, request_id, Image);
         Log.d("REQ", "request_id :" + request_id + "\n"
                 + "token :" + token + "\n"
                 + "latitude : " + Latitude + "\n"
                 + "longitude :" + Longitude + "\n"
-                + "image :" + Image.length + "\n"
                 + "staffid :" + staff_id + "\n"
                 + "siteid :" + siteIndex + "\n"
-                + "timeStamp :" + timeStamp + "\n"
                 + "isCheckin :" + isCheckIn + "\n"
-                + "request_id :" + request_id + "\n");
-
+                + "image length :" + Image.size() + "\n");
         call.enqueue(new Callback<StampResponse>() {
             @Override
             public void onResponse(Call<StampResponse> call, Response<StampResponse> response) {
                 StampResponse stampResponse = response.body();
-                Toast.makeText(CaptureCheckInOut.this, "Image Length: " + Image.length, Toast.LENGTH_LONG).show();
+                //Toast.makeText(CaptureCheckInOut.this, "Image Length: " + Image, Toast.LENGTH_LONG).show();
                 if (stampResponse == null) {
                     Toast.makeText(CaptureCheckInOut.this, "No response", Toast.LENGTH_LONG).show();
                     return;
@@ -184,6 +173,8 @@ public class CaptureCheckInOut extends AppCompatActivity {
                     String er = stampResponse.getError_message();
                     Toast.makeText(CaptureCheckInOut.this, er, Toast.LENGTH_LONG).show();
                     Log.i("FAILED: ", er);
+                    finishCheckInBtn.setEnabled(false);
+                    Image.clear();
                 }
             }
 
@@ -240,7 +231,16 @@ public class CaptureCheckInOut extends AppCompatActivity {
         if (resultCode == RESULT_OK && requestCode == CAMERA_REQUEST_CODE) {
             imageView.setImageURI(picUri);
             try {
-                Image = readFile(returnFile);
+                byte[] allBytes = readFile(returnFile);
+                Image.clear();
+                for (byte allByte : allBytes) {
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                        String str = String.valueOf(Byte.toUnsignedInt(allByte));
+                        //int a = Byte.toUnsignedInt(allBytes[i]);
+                        Image.add(str);
+                    }
+                }
+                //Image = readFile(returnFile);
                 InputImage image = InputImage.fromFilePath(CaptureCheckInOut.this, picUri);
                 scanBarcodes(image);
             } catch (IOException e) {

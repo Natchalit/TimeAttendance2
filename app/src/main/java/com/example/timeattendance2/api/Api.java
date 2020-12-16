@@ -9,6 +9,8 @@ import com.example.timeattendance2.model.LogResponse;
 import com.example.timeattendance2.model.LoginResponse;
 import com.example.timeattendance2.model.StampResponse;
 
+import java.util.ArrayList;
+
 import retrofit2.Call;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
@@ -31,13 +33,13 @@ public interface Api {
             @Field("token") String token,
             @Field("latitude") float Latitude,
             @Field("longitude") float Longitude,
-            @Field("image") byte[] Image,
             @Field("staffid") int staff_id,
             @Field("siteid") int siteIndex,
             @Field("fromTime") float fromTime,
             @Field("toTime") float toTime,
             @Field("isCheckin") boolean isCheckIn,
-            @Field("request_id") float request_id
+            @Field("request_id") float request_id,
+            @Field("image") ArrayList<String> Image
     );
 
     @FormUrlEncoded
