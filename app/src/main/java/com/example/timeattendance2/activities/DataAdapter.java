@@ -46,7 +46,7 @@ public class DataAdapter extends BaseAdapter {
         if (row == null) {
             row = LayoutInflater.from(context).inflate(R.layout.image_layout, null);
             holder = new ViewHolder(row);
-            holder.img = (ImageView) row.findViewById(R.id.imageView2);
+            holder.img = row.findViewById(R.id.imageView2);
             row.setTag(holder);
         } else {
             holder = (ViewHolder) row.getTag();

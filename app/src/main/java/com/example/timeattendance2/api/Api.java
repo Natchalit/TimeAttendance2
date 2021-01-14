@@ -9,7 +9,7 @@ import com.example.timeattendance2.model.LogResponse;
 import com.example.timeattendance2.model.LoginResponse;
 import com.example.timeattendance2.model.StampResponse;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.http.Field;
@@ -39,7 +39,7 @@ public interface Api {
             @Field("toTime") float toTime,
             @Field("isCheckin") boolean isCheckIn,
             @Field("request_id") float request_id,
-            @Field("image") ArrayList<String> Image
+            @Field("image") List<String> Image
     );
 
     @FormUrlEncoded

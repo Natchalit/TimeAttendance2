@@ -1,24 +1,18 @@
 package com.example.timeattendance2.activities;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.timeattendance2.R;
 import com.example.timeattendance2.api.RetrofitClient;
 import com.example.timeattendance2.model.LoginResponse;
 import com.example.timeattendance2.model.Sites;
 import com.google.android.material.textfield.TextInputEditText;
-
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -37,8 +31,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        usernameInput = (TextInputEditText) findViewById(R.id.usernameInput);
-        passwordInput = (TextInputEditText) findViewById(R.id.passwordInput);
+        usernameInput = findViewById(R.id.usernameInput);
+        passwordInput = findViewById(R.id.passwordInput);
 
         signInBtn();
 
@@ -46,14 +40,10 @@ public class MainActivity extends AppCompatActivity {
 
     public void signInBtn() {
         signInBtn = findViewById(R.id.signInBtn);
-        signInBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        signInBtn.setOnClickListener(v -> {
 
 //                login();
-                userLogin();
-
-            }
+            userLogin();
 
         });
     }
@@ -64,7 +54,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void userLogin() {
-
+        signInBtn.setEnabled(false);
+        signInBtn.setText("Logging In...");
         if (request_id == 0) {
             request_id = System.currentTimeMillis();
         }
@@ -105,11 +96,16 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     Toast.makeText(MainActivity.this, loginResponse.getError_message(), Toast.LENGTH_LONG).show();
                 }
+                signInBtn.setEnabled(true);
+                signInBtn.setText("Login");
+
             }
 
             @Override
             public void onFailure(Call<LoginResponse> call, Throwable t) {
                 t.printStackTrace();
+                signInBtn.setEnabled(true);
+                signInBtn.setText("Login");
             }
         });
 

@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
-import android.util.Size;
 import android.widget.Button;
 
 import androidx.annotation.NonNull;
@@ -43,7 +42,7 @@ public class CameraActivity extends AppCompatActivity {
         previewView = findViewById(R.id.previewView);
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
         cameraCapture = findViewById(R.id.camera_capture_button);
-        cameraProviderFuture.addListener((Runnable) () -> {
+        cameraProviderFuture.addListener(() -> {
             try {
                 ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
                 bindImageAnalysis(cameraProvider);
@@ -87,7 +86,7 @@ public class CameraActivity extends AppCompatActivity {
 
         Preview preview = new Preview.Builder().build();
         CameraSelector cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA;
-        ImageCapture.Builder builder = new ImageCapture.Builder().setTargetResolution(new Size(720, 1280)).setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY);
+        ImageCapture.Builder builder = new ImageCapture.Builder();
         ImageCapture imageCapture = builder.build();
         try {
             // Unbind use cases before rebinding

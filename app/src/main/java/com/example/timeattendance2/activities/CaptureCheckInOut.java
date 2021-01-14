@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -30,18 +31,16 @@ import com.google.mlkit.vision.barcode.BarcodeScanner;
 import com.google.mlkit.vision.barcode.BarcodeScanning;
 import com.google.mlkit.vision.common.InputImage;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import retrofit2.Call;
@@ -59,7 +58,7 @@ public class CaptureCheckInOut extends AppCompatActivity {
     String token;
     float Latitude, Longitude, request_id;
     int staff_id, siteIndex;
-    ArrayList<String> Image = new ArrayList<>();
+    List<String> Image = new ArrayList<>();
     boolean isCheckIn;
 
     Sites site;
@@ -92,10 +91,10 @@ public class CaptureCheckInOut extends AppCompatActivity {
         finishCheckInBtn.setEnabled(false);
         if (isCheckIn) {
             textType.setText("ลงเวลาเข้างาน\nCheck In ");
-            finishCheckInBtn.setText("Finish Check In");
+            finishCheckInBtn.setText("Check In");
         } else {
             textType.setText("ลงเวลาออกงาน\nCheck Out ");
-            finishCheckInBtn.setText("Finish Check Out");
+            finishCheckInBtn.setText("Check Out");
 
         }
 
@@ -143,8 +142,6 @@ public class CaptureCheckInOut extends AppCompatActivity {
     }
 
     private void dataCaptureUser() {
-
-
         Call<StampResponse> call = RetrofitClient
                 .getInstance()
                 .getApi()
@@ -164,16 +161,23 @@ public class CaptureCheckInOut extends AppCompatActivity {
                 //Toast.makeText(CaptureCheckInOut.this, "Image Length: " + Image, Toast.LENGTH_LONG).show();
                 if (stampResponse == null) {
                     Toast.makeText(CaptureCheckInOut.this, "No response", Toast.LENGTH_LONG).show();
+                    finishCheckInBtn.setTextColor(Color.RED);
+                    finishCheckInBtn.setText("Failed");
                     return;
                 }
                 if (stampResponse.isCompleted()) {
                     Toast.makeText(CaptureCheckInOut.this, "Success", Toast.LENGTH_LONG).show();
-                    mainMenu(token, request_id, getSites);
+                    finishCheckInBtn.setText("Passed");
+                    finishCheckInBtn.setEnabled(false);
+                    finishCheckInBtn.setTextColor(Color.GREEN);
+                    //mainMenu(token, request_id, getSites);
                 } else {
                     String er = stampResponse.getError_message();
                     Toast.makeText(CaptureCheckInOut.this, er, Toast.LENGTH_LONG).show();
-                    Log.i("FAILED: ", er);
+                    Log.d("FAILED: ", er);
+                    finishCheckInBtn.setText("Failed");
                     finishCheckInBtn.setEnabled(false);
+                    finishCheckInBtn.setTextColor(Color.RED);
                     Image.clear();
                 }
             }
@@ -186,40 +190,6 @@ public class CaptureCheckInOut extends AppCompatActivity {
         });
     }
 
-    //decodes image and scales it to reduce memory consumption
-    //NOTE: if the image has dimensions which exceed int width and int height
-    //its dimensions will be altered.
-    private Bitmap decodeToLowResImage(byte[] b, int width, int height) {
-        try {
-            //Decode image size
-            BitmapFactory.Options o = new BitmapFactory.Options();
-            o.inJustDecodeBounds = true;
-            BitmapFactory.decodeStream(new ByteArrayInputStream(b), null, o);
-
-            //The new size we want to scale to
-            final int REQUIRED_SIZE_WIDTH = (int) (width * 0.7);
-            final int REQUIRED_SIZE_HEIGHT = (int) (height * 0.7);
-
-            //Find the correct scale value. It should be the power of 2.
-            int width_tmp = o.outWidth, height_tmp = o.outHeight;
-            int scale = 1;
-            while (true) {
-                if (width_tmp / 2 < REQUIRED_SIZE_WIDTH || height_tmp / 2 < REQUIRED_SIZE_HEIGHT)
-                    break;
-                width_tmp /= 2;
-                height_tmp /= 2;
-                scale *= 2;
-            }
-
-            //Decode with inSampleSize
-            BitmapFactory.Options o2 = new BitmapFactory.Options();
-            o2.inSampleSize = scale;
-            return BitmapFactory.decodeStream(new ByteArrayInputStream(b), null, o2);
-        } catch (OutOfMemoryError e) {
-        }
-        return null;
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -228,12 +198,16 @@ public class CaptureCheckInOut extends AppCompatActivity {
         File returnFile = new File(picPath);
         Uri picUri = Uri.fromFile(returnFile);
 
+        Bitmap bmp = BitmapFactory.decodeFile(picPath);
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.JPEG, 20, bos);
+
         if (resultCode == RESULT_OK && requestCode == CAMERA_REQUEST_CODE) {
             imageView.setImageURI(picUri);
             try {
                 byte[] allBytes = readFile(returnFile);
                 Image.clear();
-                for (byte allByte : allBytes) {
+                for (byte allByte : bos.toByteArray()) {
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                         String str = String.valueOf(Byte.toUnsignedInt(allByte));
                         //int a = Byte.toUnsignedInt(allBytes[i]);
@@ -247,43 +221,6 @@ public class CaptureCheckInOut extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
-    }
-
-    public static byte[] getByteArray(Bitmap bitmap) {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 0, byteArrayOutputStream);
-        return byteArrayOutputStream.toByteArray();
-    }
-
-
-    public byte[] getBytes(InputStream inputStream) throws IOException {
-        ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
-        int bufferSize = 1024;
-        byte[] buffer = new byte[bufferSize];
-
-        int len;
-        while ((len = inputStream.read(buffer)) != -1) {
-            byteBuffer.write(buffer, 0, len);
-        }
-        return byteBuffer.toByteArray();
-    }
-
-    public static byte[] convertVideoToBytes(Uri uri) {
-        byte[] videoBytes = null;
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-            FileInputStream fis = new FileInputStream(new File(String.valueOf(uri)));
-            byte[] buf = new byte[1024];
-            int n;
-            while (-1 != (n = fis.read(buf)))
-                baos.write(buf, 0, n);
-
-            videoBytes = baos.toByteArray();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return videoBytes;
     }
 
     public static byte[] readFile(File file) throws IOException {
@@ -334,6 +271,7 @@ public class CaptureCheckInOut extends AppCompatActivity {
                         try {
                             staff_id = Integer.parseInt(rawValue);
                             Toast.makeText(CaptureCheckInOut.this, "Staff ID: " + staff_id, Toast.LENGTH_LONG).show();
+                            finishCheckInBtn.setText("Check In: " + staff_id);
                             finishCheckInBtn.setEnabled(true);
                         } catch (Exception e) {
                             Toast.makeText(CaptureCheckInOut.this, "Can't parse Staff ID from " + rawValue, Toast.LENGTH_LONG).show();
@@ -344,20 +282,6 @@ public class CaptureCheckInOut extends AppCompatActivity {
                     Toast.makeText(CaptureCheckInOut.this, "Can't read QR Code", Toast.LENGTH_LONG).show();
                 });
     }
-/*
-    public void alertDialog() {
-        captureBtn.setOnClickListener(v -> {
-            AlertDialog.Builder builder = new AlertDialog.Builder(CaptureCheckin.this);
-            builder.setTitle("Capture Alert")
-                    .setMessage("ไม่ผ่าน")
-                    .setCancelable(false)
-                    .setPositiveButton("ถ่ายรูปใหม่", (dialog, which) -> Toast.makeText(CaptureCheckin.this, "ถ่ายรูปใหม่", Toast.LENGTH_SHORT).show());
-
-            //Creating dialog box
-            AlertDialog dialog = builder.create();
-            dialog.show();
-        });
-    }*/
 
     public void mainMenu(String token, float request_id, Sites[] getSites) {
         Intent intent = new Intent(this, MainMenu.class);
@@ -369,7 +293,7 @@ public class CaptureCheckInOut extends AppCompatActivity {
 
     public void dateRealtime() {
         Date currentDate = Calendar.getInstance().getTime();
-        String formattedDate = DateFormat.getDateInstance(DateFormat.FULL).format(currentDate);
+        String formattedDate = DateFormat.getDateInstance(DateFormat.FULL, Locale.US).format(currentDate);
         TextView textViewDate = findViewById(R.id.dateText);
         textViewDate.setText(formattedDate);
     }

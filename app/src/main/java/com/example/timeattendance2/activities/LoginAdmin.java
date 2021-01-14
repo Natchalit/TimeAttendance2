@@ -7,12 +7,10 @@ import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.timeattendance2.R;
-import com.google.android.material.textfield.TextInputEditText;
 
 public class LoginAdmin extends AppCompatActivity {
 
     Button loginBtn;
-    TextInputEditText usernameInput, passwordInput;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

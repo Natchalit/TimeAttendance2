@@ -114,9 +114,6 @@ public class ImageDaily extends AppCompatActivity implements AdapterView.OnItemS
             selectedSite = spinner.getSelectedItem().toString();
             callApi();
 
-        /*    if (!textSpn.equals("Select Unit")) {
-                imageThumbnailCheckIn(textRadio, textSpn);
-            }*/
         });
     }
 
