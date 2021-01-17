@@ -142,6 +142,7 @@ public class CaptureCheckInOut extends AppCompatActivity {
     }
 
     private void dataCaptureUser() {
+        finishCheckInBtn.setText("Check In...");
         Call<StampResponse> call = RetrofitClient
                 .getInstance()
                 .getApi()
@@ -178,12 +179,15 @@ public class CaptureCheckInOut extends AppCompatActivity {
                     finishCheckInBtn.setText("Failed");
                     finishCheckInBtn.setEnabled(false);
                     finishCheckInBtn.setTextColor(Color.RED);
-                    Image.clear();
+                    Image = null;
                 }
             }
 
             @Override
             public void onFailure(Call<StampResponse> call, Throwable t) {
+                finishCheckInBtn.setText("Failed");
+                finishCheckInBtn.setEnabled(false);
+                finishCheckInBtn.setTextColor(Color.RED);
                 Toast.makeText(CaptureCheckInOut.this, t.getMessage(), Toast.LENGTH_LONG).show();
                 Log.e("FAILURE: ", t.getMessage());
             }
@@ -197,23 +201,25 @@ public class CaptureCheckInOut extends AppCompatActivity {
         String picPath = (String) data.getExtras().get("uri");
         File returnFile = new File(picPath);
         Uri picUri = Uri.fromFile(returnFile);
-
-        Bitmap bmp = BitmapFactory.decodeFile(picPath);
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        bmp.compress(Bitmap.CompressFormat.JPEG, 20, bos);
+//
+//        Bitmap bmp = BitmapFactory.decodeFile(picPath);
+//        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//        bmp.compress(Bitmap.CompressFormat.JPEG, 50, bos);
 
         if (resultCode == RESULT_OK && requestCode == CAMERA_REQUEST_CODE) {
             imageView.setImageURI(picUri);
             try {
-                byte[] allBytes = readFile(returnFile);
+//                byte[] allBytes = readFile(returnFile);
                 Image.clear();
-                for (byte allByte : bos.toByteArray()) {
+               /* for (byte allByte : allBytes) {
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                         String str = String.valueOf(Byte.toUnsignedInt(allByte));
                         //int a = Byte.toUnsignedInt(allBytes[i]);
                         Image.add(str);
                     }
-                }
+                }*/
+
+                Image = convertToString(picPath);
                 //Image = readFile(returnFile);
                 InputImage image = InputImage.fromFilePath(CaptureCheckInOut.this, picUri);
                 scanBarcodes(image);
@@ -221,6 +227,23 @@ public class CaptureCheckInOut extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+    }
+
+    private List<String> convertToString(String path) {
+        Bitmap bmp = BitmapFactory.decodeFile(path);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.JPEG, 60, byteArrayOutputStream);
+        byte[] imgByte = byteArrayOutputStream.toByteArray();
+        List<String> temp = new ArrayList<>();
+        for (byte allByte : imgByte) {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                String str = String.valueOf(Byte.toUnsignedInt(allByte));
+                //int a = Byte.toUnsignedInt(allBytes[i]);
+                temp.add(str);
+            }
+        }
+        return temp;
+        //return Base64.encodeToString(imgByte, Base64.DEFAULT);
     }
 
     public static byte[] readFile(File file) throws IOException {
@@ -273,6 +296,7 @@ public class CaptureCheckInOut extends AppCompatActivity {
                             Toast.makeText(CaptureCheckInOut.this, "Staff ID: " + staff_id, Toast.LENGTH_LONG).show();
                             finishCheckInBtn.setText("Check In: " + staff_id);
                             finishCheckInBtn.setEnabled(true);
+                            finishCheckInBtn.setTextColor(Color.WHITE);
                         } catch (Exception e) {
                             Toast.makeText(CaptureCheckInOut.this, "Can't parse Staff ID from " + rawValue, Toast.LENGTH_LONG).show();
                         }

@@ -12,9 +12,10 @@ public class RetrofitClient {
     private static RetrofitClient mInstance;
     private Retrofit retrofit;
 
-    final OkHttpClient okHttpClient = new OkHttpClient.Builder()
-            .readTimeout(120, TimeUnit.SECONDS)
-            .connectTimeout(120, TimeUnit.SECONDS)
+    final OkHttpClient okHttpClient = new OkHttpClient.Builder().callTimeout(2, TimeUnit.MINUTES)
+            .readTimeout(5, TimeUnit.MINUTES)
+            .connectTimeout(5, TimeUnit.MINUTES)
+            .writeTimeout(5, TimeUnit.MINUTES)
             .build();
 
     private RetrofitClient() {
