@@ -240,6 +240,8 @@ public class CaptureCheckInOut extends AppCompatActivity {
                 String str = String.valueOf(Byte.toUnsignedInt(allByte));
                 //int a = Byte.toUnsignedInt(allBytes[i]);
                 temp.add(str);
+            } else {
+                temp.add(String.valueOf(allByte));
             }
         }
         return temp;
