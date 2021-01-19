@@ -210,16 +210,17 @@ public class CaptureCheckInOut extends AppCompatActivity {
             imageView.setImageURI(picUri);
             try {
 //                byte[] allBytes = readFile(returnFile);
-                Image.clear();
+                //Image.clear();
                /* for (byte allByte : allBytes) {
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                         String str = String.valueOf(Byte.toUnsignedInt(allByte));
                         //int a = Byte.toUnsignedInt(allBytes[i]);
-                        Image.add(str);
+                        Image.add(strฟก);
                     }
                 }*/
 
                 Image = convertToString(picPath);
+                Log.i("Image", "image: " + Image.size());
                 //Image = readFile(returnFile);
                 InputImage image = InputImage.fromFilePath(CaptureCheckInOut.this, picUri);
                 scanBarcodes(image);
